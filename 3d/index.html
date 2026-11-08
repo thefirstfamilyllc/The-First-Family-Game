@@ -32,6 +32,35 @@ ears=[sphere(avatar,.105,'#a87859',-.34,2.33,0,.6,1,.7),sphere(avatar,.105,'#a87
 for(let x of [-.13,.13]){sphere(avatar,.075,'#fff',x,2.4,.292,.88,.72,.4);eyes.push(sphere(avatar,.044,'#5c3824',x,2.4,.325,.8,.85,.5))}
 sphere(avatar,.065,'#9d634b',0,2.27,.305,.7,.9,.5);
 hair=sphere(avatar,.36,'#251c19',0,2.62,0,1,0.48,1);
+
+// Original civilian character for the creator: smooth geometry, visible face,
+// neck, hands, fitted clothing and shoes. No soldier/armor in customization.
+const civilian=new THREE.Group();avatar.add(civilian);
+const smooth=(parent,r,c,x,y,z,sx=1,sy=1,sz=1)=>sphere(parent,r,c,x,y,z,sx,sy,sz);
+const skinParts=[],shirtParts=[],pantsParts=[],hairParts=[],irisParts=[];
+function part(group,r,color,x,y,z,sx,sy,sz){const m=smooth(group,r,color,x,y,z,sx,sy,sz);return m}
+function skinPart(r,x,y,z,sx,sy,sz){const m=part(civilian,r,'#956446',x,y,z,sx,sy,sz);skinParts.push(m);return m}
+function clothPart(r,x,y,z,sx,sy,sz){const m=part(civilian,r,'#713fa7',x,y,z,sx,sy,sz);shirtParts.push(m);return m}
+function pantsPart(r,x,y,z,sx,sy,sz){const m=part(civilian,r,'#29374b',x,y,z,sx,sy,sz);pantsParts.push(m);return m}
+pantsPart(.32,-.19,.58,0,.69,1.58,.8);pantsPart(.32,.19,.58,0,.69,1.58,.8);
+part(civilian,.24,'#222a35',-.20,.13,.12,1.22,.46,1.9);part(civilian,.24,'#222a35',.20,.13,.12,1.22,.46,1.9);
+clothPart(.57,0,1.47,0,1,1.17,.62);
+clothPart(.24,-.55,1.48,0,.86,1.65,.85);clothPart(.24,.55,1.48,0,.86,1.65,.85);
+skinPart(.13,-.59,.99,.02,1,1.55,.75);skinPart(.13,.59,.99,.02,1,1.55,.75);
+skinPart(.16,0,2.02,0,.8,1,.8);
+const face=skinPart(.39,0,2.39,.025,.89,1.18,.86);
+const leftEar=skinPart(.13,-.36,2.38,.01,.6,1.05,.63),rightEar=skinPart(.13,.36,2.38,.01,.6,1.05,.63);
+for(const x of [-.15,.15]){
+ part(civilian,.105,'#f7f5ee',x,2.43,.326,1,.67,.38);
+ const iris=part(civilian,.057,'#5c3824',x,2.43,.361,.9,.9,.35);irisParts.push(iris);
+ part(civilian,.023,'#111116',x,2.43,.381,1,1,.4);
+ part(civilian,.087,'#35251e',x,2.54,.333,1.25,.18,.25);
+}
+skinPart(.11,0,2.31,.374,.65,.9,.62);
+part(civilian,.11,'#824f49',0,2.18,.335,1.12,.22,.28);
+const hairCap=part(civilian,.40,'#211b1a',0,2.69,-.025,.94,.49,.95);hairParts.push(hairCap);
+for(let i=0;i<10;i++){const a=i*Math.PI*2/10;hairParts.push(part(civilian,.105,'#211b1a',Math.sin(a)*.26,2.76,Math.cos(a)*.22,.9,1.3,.9))}
+civilian.visible=true;
 const choices={template:['Jay','Esined','Jahdē'],skin:['#f4d5bd','#cf9977','#956446','#603e32','#392721'],hairStyle:['Short','Curly','Afro','Long','Bald'],hairColor:['#211b1a','#6b3f25','#b78b55','#d8d1c7','#8d49bd','#4c8aab'],eyes:['#5c3824','#3d765c','#507ab0','#888888','#241e1a'],face:['Narrow','Balanced','Wide'],ears:['Small','Medium','Large'],build:['Slim','Average','Broad'],outfit:['#713fa7','#2e343d','#89bb4b','#d94e76','#e5a43e']};
 const labels={template:'Starting character',skin:'Skin shade',hairStyle:'Hair style',hairColor:'Hair color',eyes:'Eye color',face:'Face shape',ears:'Ear size',build:'Body build',outfit:'Outfit color'};
 const state={template:0,name:'Jay',skin:2,hairStyle:0,hairColor:0,eyes:0,face:1,ears:1,build:1,outfit:0,height:1};
@@ -55,7 +84,7 @@ function updateButtons(){for(const key of Object.keys(choiceButtons))choiceButto
 updateButtons();
 let hLabel=document.createElement('label');hLabel.textContent='Height';$('fields').append(hLabel);let slider=document.createElement('input');slider.type='range';slider.min='.8';slider.max='1.2';slider.step='.05';slider.value='1';slider.oninput=()=>{state.height=+slider.value;refresh()};$('fields').append(slider);
 function recolor(mesh,color){mesh.material.color.set(color)}
-function refresh(){if(animatedModel){animatedModel.visible=true;if(playing){animatedModel.traverse(o=>{if(o.isMesh&&o.material){const n=o.name.toLowerCase();if(n.includes('body')||n.includes('shirt')||n.includes('torso')){o.material=o.material.clone();o.material.color.set(choices.outfit[state.outfit])}}});animatedModel.scale.setScalar(state.height)}}recolor(head,choices.skin[state.skin]);ears.forEach(e=>{recolor(e,choices.skin[state.skin]);e.scale.x=[.4,.6,.85][state.ears]});recolor(hair,choices.hairColor[state.hairColor]);hair.visible=!modelLoaded&&state.hairStyle!==4;hair.scale.y=[.48,.75,1.12,1.4,0][state.hairStyle];hair.position.y=state.hairStyle===3?2.49:2.62;head.scale.x=[.84,1,1.18][state.face];eyes.forEach(e=>recolor(e,choices.eyes[state.eyes]));body.scale.x=[.75,1,1.28][state.build];[body,...arms].forEach(m=>recolor(m,choices.outfit[state.outfit]));avatar.scale.y=state.height}refresh();
+function refresh(){if(animatedModel){animatedModel.visible=playing;if(playing){animatedModel.traverse(o=>{if(o.isMesh&&o.material){const n=o.name.toLowerCase();if(n.includes('body')||n.includes('shirt')||n.includes('torso')){o.material=o.material.clone();o.material.color.set(choices.outfit[state.outfit])}}});animatedModel.scale.setScalar(state.height)}}recolor(head,choices.skin[state.skin]);ears.forEach(e=>{recolor(e,choices.skin[state.skin]);e.scale.x=[.4,.6,.85][state.ears]});recolor(hair,choices.hairColor[state.hairColor]);hair.visible=!modelLoaded&&state.hairStyle!==4;hair.scale.y=[.48,.75,1.12,1.4,0][state.hairStyle];hair.position.y=state.hairStyle===3?2.49:2.62;head.scale.x=[.84,1,1.18][state.face];eyes.forEach(e=>recolor(e,choices.eyes[state.eyes]));body.scale.x=[.75,1,1.28][state.build];[body,...arms].forEach(m=>recolor(m,choices.outfit[state.outfit]));skinParts.forEach(m=>m.material.color.set(choices.skin[state.skin]));shirtParts.forEach(m=>m.material.color.set(choices.outfit[state.outfit]));hairParts.forEach(m=>{m.material.color.set(choices.hairColor[state.hairColor]);m.visible=state.hairStyle!==4;m.scale.y=state.hairStyle===2?1.7:state.hairStyle===3?1.45:1});irisParts.forEach(m=>m.material.color.set(choices.eyes[state.eyes]));face.scale.x=[.77,.89,1.04][state.face];leftEar.scale.x=rightEar.scale.x=[.4,.6,.9][state.ears];shirtParts[0].scale.x=[.83,1,1.17][state.build];civilian.scale.y=state.height;avatar.scale.y=1}refresh();
 // Load an actual skinned, animated human model. The geometric avatar remains only
 // as an offline fallback if the external model cannot be downloaded.
 const loader=new GLTFLoader();
@@ -65,7 +94,7 @@ loader.load('https://threejs.org/examples/models/gltf/Soldier.glb',gltf=>{
   animatedModel.position.y=0;
   animatedModel.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
   avatar.add(animatedModel);animatedModel.visible=true;
-  // The customisable avatar stays visible in the studio; animated model is used in play mode.
+  // The original civilian avatar stays visible in the studio; animation sample only in play mode.
   // Hide the extra procedural facial features too.
   // Keep editable meshes for the character studio.
   mixer=new THREE.AnimationMixer(animatedModel);
@@ -73,12 +102,12 @@ loader.load('https://threejs.org/examples/models/gltf/Soldier.glb',gltf=>{
   const walk=gltf.animations.find(a=>/walk/i.test(a.name));
   if(idle){idleAction=mixer.clipAction(idle);idleAction.play()}
   if(walk){walkAction=mixer.clipAction(walk);walkAction.play();walkAction.setEffectiveWeight(0)}
-  modelLoaded=true;for(const c of avatar.children){if(c!==animatedModel)c.visible=false}refresh();
+  modelLoaded=true;animatedModel.visible=false;refresh();
   $('status').textContent='Animated 3D character loaded. Animated character restored. Some appearance options are not yet supported by this model.';
 },undefined,error=>{$('status').textContent='3D character asset could not load. Showing temporary offline fallback.';console.warn(error)});
 let playing=false,drag=false,previousX=0,turn=0;studioCamera();canvas.addEventListener('pointerdown',e=>{drag=true;previousX=e.clientX});window.addEventListener('pointerup',()=>drag=false);canvas.addEventListener('pointermove',e=>{if(!drag||playing)return;turn+=(e.clientX-previousX)*.01;previousX=e.clientX;avatar.rotation.y=turn});
 $('start').onclick=()=>{playing=true;if(animatedModel){animatedModel.visible=true;avatar.children.forEach(c=>{if(c!==animatedModel)c.visible=false})}document.body.classList.add('playing');$('status').textContent='Welcome, '+(state.name.trim()||'Player')+'! Explore your first neighborhood. Use the arrows to move.';avatar.position.set(0,0,0);studioCamera()};
-$('back').onclick=()=>{playing=false;if(animatedModel){animatedModel.visible=true;avatar.children.forEach(c=>{if(c!==animatedModel)c.visible=false})}refresh();document.body.classList.remove('playing');avatar.position.set(0,0,0)};
+$('back').onclick=()=>{playing=false;if(animatedModel){animatedModel.visible=false}civilian.visible=true;refresh();document.body.classList.remove('playing');avatar.position.set(0,0,0)};
 const movement={left:false,right:false,forward:false};for(const k of Object.keys(movement)){const el=$(k);el.addEventListener('pointerdown',e=>{e.preventDefault();movement[k]=true;el.setPointerCapture(e.pointerId)});for(const ev of ['pointerup','pointercancel','lostpointercapture'])el.addEventListener(ev,()=>movement[k]=false)}
 window.addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='w')movement.forward=true;if(e.key==='ArrowLeft'||e.key==='a')movement.left=true;if(e.key==='ArrowRight'||e.key==='d')movement.right=true});window.addEventListener('keyup',e=>{if(e.key==='ArrowUp'||e.key==='w')movement.forward=false;if(e.key==='ArrowLeft'||e.key==='a')movement.left=false;if(e.key==='ArrowRight'||e.key==='d')movement.right=false});
 let last=performance.now();function animate(now){requestAnimationFrame(animate);let dt=Math.min((now-last)/1000,.05);last=now;if(mixer)mixer.update(dt);if(walkAction&&idleAction){const moving=playing&&movement.forward;walkAction.setEffectiveWeight(moving?1:0);idleAction.setEffectiveWeight(moving?0:1)}if(playing){if(movement.left)avatar.rotation.y+=dt*2.4;if(movement.right)avatar.rotation.y-=dt*2.4;if(movement.forward){avatar.position.x-=Math.sin(avatar.rotation.y)*dt*4;avatar.position.z-=Math.cos(avatar.rotation.y)*dt*4}camera.clearViewOffset();camera.position.lerp(new THREE.Vector3(avatar.position.x+4,avatar.position.y+4.4,avatar.position.z+8),.09);camera.lookAt(avatar.position.x,1.5,avatar.position.z)}renderer.render(scene,camera)}requestAnimationFrame(animate);
