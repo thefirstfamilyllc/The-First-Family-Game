@@ -105,6 +105,30 @@
 .selection-stage:before{bottom:14%!important}
 .stage-rotate{bottom:1%!important}
 }
+</style><style id="selection-no-overlap-v3">
+@media(max-width:700px) and (orientation:portrait){
+#select.selection-layout{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:76px minmax(300px,45vh) auto auto;gap:10px;padding:10px!important;overflow-y:auto!important;overflow-x:hidden!important;align-content:start;min-height:100dvh;height:100dvh;box-sizing:border-box}
+#select .selection-top,#select .selection-stage,#select .selection-left,#select .selection-bottom{position:relative!important;inset:auto!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;width:auto!important;height:auto!important;max-height:none!important}
+#select .selection-top{grid-column:1/-1;grid-row:1;min-height:0;align-items:center!important}
+#select .selection-top .character-brand-logo{height:66px!important;max-height:66px!important;width:125px!important}
+#select .selection-wallet{font-size:9px!important;max-width:calc(100% - 130px);white-space:normal!important;text-align:right}
+#select .selection-stage{grid-column:1/-1;grid-row:2;min-height:300px!important;border-radius:18px!important;overflow:hidden!important}
+#select #approvedCharacterPortrait{inset:0 0 45px!important;background-size:auto 100%!important}
+#select .selection-stage:before{bottom:46px!important;height:4%!important;left:30%!important;right:30%!important}
+#select .stage-rotate{bottom:4px!important;left:50%!important;width:100%!important;transform:translateX(-50%)!important}
+#select .selection-left{grid-column:1/-1;grid-row:3;display:grid!important;grid-template-columns:1fr 1fr;gap:8px;overflow:visible!important;padding:10px!important}
+#select .selection-left>h2{grid-column:1/-1;margin:0!important;font-size:15px!important}
+#select .pick-row{grid-column:1;align-self:start}
+#select .selection-profile{grid-column:2;grid-row:2;margin:0!important;padding:0 0 0 8px!important;border-top:0!important;border-left:1px solid #b18c5c}
+#select .selection-profile p{font-size:11px!important;line-height:1.25}
+#select .selection-stat{font-size:10px!important}
+#select .selection-bottom{grid-column:1/-1;grid-row:4;display:grid!important;grid-template-columns:auto minmax(0,1fr);align-items:center!important;gap:8px!important;padding:0 0 16px}
+#select .selection-center{grid-column:2;grid-row:1;justify-content:center;min-width:0}
+#select .selection-actions{grid-column:1/-1;grid-row:2;display:grid!important;grid-template-columns:1fr 1fr;gap:8px}
+#select .selection-actions button{font-size:11px!important;min-width:0!important}
+#select #selectCharacter{min-width:0!important;font-size:11px!important;flex:1}
+#select #inlineCustomize{position:relative!important;grid-column:1/-1;grid-row:5;inset:auto!important;max-width:none!important;margin:0 0 20px!important}
+}
 </style></head><body>
 <section id="start" class="screen"><div class="menu"><button id="new" aria-label="New Game">NEW GAME</button><button id="load" aria-label="Load Game">LOAD GAME</button><button id="settings" aria-label="Settings">SETTINGS</button><button id="credits" aria-label="Credits">CREDITS</button><button id="exit" aria-label="Exit">EXIT</button><button id="store" aria-label="Game Store">GAME STORE</button></div><div class="fallback">NEW GAME → CHARACTER SELECTION → LAUNDRY BUSINESS</div></section>
 
