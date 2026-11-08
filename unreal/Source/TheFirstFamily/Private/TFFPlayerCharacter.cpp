@@ -1,4 +1,5 @@
 #include "TFFPlayerCharacter.h"
+#include "TFFInteractionComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "Components/InputComponent.h"
@@ -6,6 +7,7 @@
 ATFFPlayerCharacter::ATFFPlayerCharacter()
 {
     PrimaryActorTick.bCanEverTick = false;
+    Interaction = CreateDefaultSubobject<UTFFInteractionComponent>(TEXT("Interaction"));
     GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
     bUseControllerRotationYaw = false;
     GetCharacterMovement()->bOrientRotationToMovement = true;
@@ -21,6 +23,7 @@ void ATFFPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
     Input->BindAction("Jump", IE_Released, this, &ATFFPlayerCharacter::EndJump);
     Input->BindAction("Sprint", IE_Pressed, this, &ATFFPlayerCharacter::StartSprint);
     Input->BindAction("Sprint", IE_Released, this, &ATFFPlayerCharacter::StopSprint);
+    Input->BindAction("Interact", IE_Pressed, this, &ATFFPlayerCharacter::Interact);
 }
 void ATFFPlayerCharacter::MoveForward(float Value)
 {
@@ -39,3 +42,4 @@ void ATFFPlayerCharacter::SetMovementEnabled(bool bEnabled)
     if (bEnabled) GetCharacterMovement()->SetMovementMode(MOVE_Walking);
     else GetCharacterMovement()->DisableMovement();
 }
+void ATFFPlayerCharacter::Interact() { if (Interaction) Interaction->TryInteract(); }
