@@ -73,79 +73,47 @@
 .sim-tabs{display:flex;gap:7px;margin:12px 0}.sim-tabs button{flex:1;background:#3a275c}.sim-tabs button.chosen{background:#a3e635;color:#151c0a}.sim-character{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#272044;border-radius:11px;padding:12px}.sim-character b{font-size:17px}.sim-needs{display:flex;gap:8px;flex-wrap:wrap;justify-content:end}.sim-needs span{font-size:11px}.sim-needs b{font-size:12px}
 .sim-game h3{font-size:17px;margin:16px 0 9px}.sim-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.sim-actions button{display:flex;align-items:center;text-align:left;gap:9px;background:#332650;border:1px solid #7655a2;min-height:76px;padding:10px}.sim-actions button b{font-size:13px;color:#fff}.action-icon{font-size:27px}.sim-event{background:#1f3429;border-left:4px solid #b5ed4e;margin:13px 0;padding:13px;min-height:68px;border-radius:8px;line-height:1.5}.sim-bottom{display:flex;gap:8px}.sim-bottom button{flex:1}.sim-bottom button:first-child{background:#a3e635;color:#1d230f}.sim-locked{font-size:11px;color:#b7accd;margin:14px 0 24px;text-align:center}
 @keyframes avatar-idle{to{transform:translateY(-8px)}}@keyframes vehicle-idle{to{transform:translateX(8px)}}@media(prefers-reduced-motion:reduce){.sim-avatar,.sim-vehicle{animation:none}}@media(max-width:400px){.sim-scene{height:260px}.sim-avatar{width:65px}.sim-avatar img{height:87px}.sim-actions button{padding:7px;gap:5px}.sim-actions button b{font-size:12px}}
-</style><main><section class="panel" id="intro"><div class="approved-home" role="img" aria-label="The First Family game opening artwork with Jay, Esined, Jahdē, laundry van and storefront"><div class="home-image"></div><button class="art-play" id="start" aria-label="Play Now">PLAY NOW</button></div></section><section id="play" class="sim-game">
-<header class="sim-header"><div><strong>THE FIRST FAMILY</strong><small>Family Life • Laundry Business</small></div><button id="sim-home" aria-label="Return to home screen">⌂ Home</button></header>
-<div class="sim-stats"><div>DAY <b id="day">1</b></div><div>CASH <b id="cash">$250</b></div><div>REPUTATION <b id="rep">50</b></div><div>LEVEL <b id="level">1</b></div></div>
-<div class="sim-scene"><div class="sim-sky"></div><div class="sim-shop"><div class="sim-shop-sign">THE FIRST FAMILY<br><small>LAUNDRY</small></div><div class="sim-door">▣</div></div><div class="sim-house">⌂<small>HOME</small></div><div class="sim-vehicle">🚐</div><div class="sim-avatars" id="avatars"></div><div class="sim-scene-caption" id="scene-caption">Select a family member to choose their next action.</div></div>
-<div class="sim-tabs" id="character-tabs"></div>
-<div class="sim-character"><div><b id="selected-name">Jay</b><small id="selected-role">Laundry business owner</small></div><div class="sim-needs"><span>⚡ Energy <b id="energy">80</b></span><span>😊 Mood <b id="mood">75</b></span><span>🧺 Orders <b id="orders">0</b></span></div></div>
-<h3>Choose an action</h3><div class="sim-actions" id="action-options"></div>
-<div class="sim-event" id="status" role="status">Your choices shape the family's story. Some actions succeed; others have setbacks.</div>
-<div class="sim-bottom"><button id="next-day">☀️ End Day</button><button id="save">Save</button><button id="reset">New Game</button></div>
-<div class="sim-locked">🔒 Cleaning business — unlocks at Level 5 · 🔒 Street Team — later · 🔒 Franchises — later</div>
-</section></main><script>(()=>{'use strict';
-const $=id=>document.getElementById(id);
-const people=[
-{id:'jay',name:'Jay',role:'Dad · Laundry owner',img:'B954C116-A001-4BC1-A54B-E7E8CF28F1EB.jpeg',energy:85,mood:80},
-{id:'esined',name:'Esined',role:'Daughter · Family member',img:'412E1A51-4ACD-405E-8510-030899A62446.jpeg',energy:85,mood:85},
-{id:'jahde',name:'Jahdē',role:'Son · Family member',img:'340F0E4C-FBE6-4E68-8701-9AF3ECDFB800.jpeg',energy:85,mood:80}
-];
-const initial=()=>({day:1,cash:250,rep:50,level:1,xp:0,orders:0,selected:'jay',people:people.map(p=>({...p})),last:'Select a family member and choose an action.'});
-let s=initial();try{const old=JSON.parse(localStorage.getItem('tff-sim-v1')||'null');if(old&&Array.isArray(old.people)&&old.people.length===3)s=old}catch(e){}
-const clamp=n=>Math.max(0,Math.min(100,Math.round(n)));
-const active=()=>s.people.find(p=>p.id===s.selected)||s.people[0];
-const actions={
-jay:[
-['🧺','Wash & fold orders','Earn money, use energy','wash'],
-['🚐','Pickup & deliver','Potentially earn more, risk delays','deliver'],
-['📣','Advertise laundry service','Spend $20, chance of new customers','advertise'],
-['💬','Talk with a customer','Build relationships, possible complaint','customer'],
-['🛋️','Rest at home','Recover energy, use time','rest'],
-['👨‍👧‍👦','Spend family time','Improve family mood','family']],
-esined:[
-['📚','Study','Build skills and confidence','study'],
-['🎨','Creative hobby','Improve mood, sometimes tiring','hobby'],
-['💬','Talk with family','Strengthen family bonds','family'],
-['🛋️','Relax','Restore energy','rest']],
-jahde:[
-['📚','Study','Improve skills; effort costs energy','study'],
-['🏀','Play sports','Boost mood; uses energy','sports'],
-['💬','Talk with family','Strengthen family bonds','family'],
-['🛋️','Relax','Restore energy','rest']]
-};
-function save(){try{localStorage.setItem('tff-sim-v1',JSON.stringify(s));return true}catch(e){return false}}
-function render(){
-$('day').textContent=s.day;$('cash').textContent='$'+s.cash.toFixed(0);$('rep').textContent=s.rep;$('level').textContent=s.level;$('orders').textContent=s.orders;
-const p=active();$('selected-name').textContent=p.name;$('selected-role').textContent=p.role;$('energy').textContent=p.energy;$('mood').textContent=p.mood;
-$('character-tabs').innerHTML=s.people.map(q=>'<button data-person="'+q.id+'" class="'+(q.id===p.id?'chosen':'')+'">'+q.name+'</button>').join('');
-$('avatars').innerHTML=s.people.map(q=>'<button data-person="'+q.id+'" class="sim-avatar '+(q.id===p.id?'chosen':'')+'"><img src="'+q.img+'" alt="'+q.name+' official game portrait"><span>'+q.name+'</span></button>').join('');
-$('action-options').innerHTML=actions[p.id].map(a=>'<button data-action="'+a[3]+'"><span class="action-icon">'+a[0]+'</span><span><b>'+a[1]+'</b><small>'+a[2]+'</small></span></button>').join('');
-$('status').textContent=s.last;$('scene-caption').textContent=p.name+' is ready for the next decision.';
-document.querySelectorAll('[data-person]').forEach(b=>b.onclick=()=>{s.selected=b.dataset.person;render()});
-document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>takeAction(b.dataset.action));
+</style><style>.world-game{background:#17152b;color:#fff;min-height:100dvh;padding:10px}.world-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.world-top b{color:#c4fa59;font-size:18px}.world-top small{display:block;color:#c8c2df;font-size:11px}.world-top button,.world-footer button{background:#49326d}.world-stats{display:flex;gap:6px;margin-bottom:8px}.world-stats span{flex:1;text-align:center;border:1px solid #6c528e;border-radius:8px;background:#302346;padding:8px 2px;font-size:13px}.world-stats b{color:#e8ffaf}#world-viewport{height:min(64dvh,610px);min-height:360px;position:relative;background:linear-gradient(#92c8fa,#8ac67c);border-radius:14px;overflow:hidden;border:2px solid #7755aa;touch-action:none}#world-viewport canvas{width:100%;height:100%;display:block;touch-action:none}#world-loading{position:absolute;inset:0;display:grid;place-items:center;background:#20173c;color:white;z-index:4}#world-hint{position:absolute;top:8px;left:8px;right:8px;pointer-events:none;text-align:center;background:#211d3bc9;padding:7px;border-radius:8px;font-size:12px;z-index:2}.world-characters{display:flex;gap:6px;margin:10px 0}.world-characters button{flex:1;padding:10px 4px;background:#44305e;font-size:12px}.world-characters button.chosen{background:#a3e635;color:#1d270c}#world-dialog{min-height:58px;background:#25203e;border-left:4px solid #a3e635;padding:11px;border-radius:8px;line-height:1.4;font-size:13px}#world-actions{display:flex;gap:8px;margin-top:8px}#world-actions button{flex:1;background:#a3e635;color:#1e290c}#world-actions button.secondary{background:#604477;color:#fff}.world-footer{display:flex;gap:8px;margin-top:12px}.world-footer button{flex:1}</style><main><section class="panel" id="intro"><div class="approved-home" role="img" aria-label="The First Family game opening artwork with Jay, Esined, Jahdē, laundry van and storefront"><div class="home-image"></div><button class="art-play" id="start" aria-label="Play Now">PLAY NOW</button></div></section><section id="play" class="world-game"><header class="world-top"><div><b>THE FIRST FAMILY</b><small>3D Neighborhood • Early Build</small></div><button id="world-home">⌂ Home</button></header><div class="world-stats"><span>💵 <b id="world-cash">$250</b></span><span>⚡ <b id="world-energy">85</b></span><span>⭐ <b id="world-rep">50</b></span><span>🧺 <b id="world-orders">0</b></span></div><div id="world-viewport"><div id="world-loading">Loading the 3D neighborhood…</div><div id="world-hint">Tap the ground to walk. Tap a glowing object to interact.</div></div><div class="world-characters"><button data-person="jay" class="chosen">Jay</button><button data-person="esined">Esined</button><button data-person="jahde">Jahdē</button><button id="world-camera">↻ View</button></div><div id="world-dialog" role="status">Select a character, then tap anywhere in the 3D world.</div><div id="world-actions"></div><div class="world-footer"><button id="world-save">Save progress</button><button id="world-reset">Restart</button></div></section></main><script type="module">
+import * as THREE from 'https://esm.sh/three@0.170.0';
+const $=id=>document.getElementById(id), viewport=$('world-viewport');
+const fresh=()=>({cash:250,rep:50,orders:0,selected:'jay',people:{jay:{energy:85,mood:80},esined:{energy:90,mood:90},jahde:{energy:90,mood:85}}});
+let state=fresh();try{const v=JSON.parse(localStorage.getItem('tff-world-v1')||'null');if(v&&v.people)state=v}catch(e){}
+let started=false,renderer,scene,camera,raycaster,ground,selectedTarget=null,pending=null,orbit=0,characters={},objects=[],clock=new THREE.Clock(),moving=false;
+const material=(color)=>new THREE.MeshStandardMaterial({color,roughness:.85});
+const mats={grass:material('#70aa69'),road:material('#626979'),wall:material('#dfc2ec'),roof:material('#60418d'),home:material('#e8c6a1'),purple:material('#623a99'),lime:material('#b5ec55'),glass:material('#80b9d0'),white:material('#f5eee7'),brown:material('#9d694a'),steel:material('#adb3bf'),skin:material('#9d674d')};
+function box(w,h,d,mat,x,y,z,parent=scene){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
+function label(txt,x,y,z,size=1){const c=document.createElement('canvas');c.width=512;c.height=128;const ctx=c.getContext('2d');ctx.fillStyle='#2d1553';ctx.fillRect(0,0,512,128);ctx.fillStyle='#d4ff71';ctx.font='bold 42px Arial';ctx.textAlign='center';ctx.fillText(txt,256,78);const t=new THREE.CanvasTexture(c);const mesh=new THREE.Mesh(new THREE.PlaneGeometry(size*3.2,size*.8),new THREE.MeshBasicMaterial({map:t,side:THREE.DoubleSide}));mesh.position.set(x,y,z);scene.add(mesh);return mesh}
+function target(name,x,z,color,action){const m=new THREE.Mesh(new THREE.CylinderGeometry(.58,.58,.08,24),new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.38,transparent:true,opacity:.75}));m.position.set(x,.06,z);scene.add(m);m.userData={action,name};objects.push(m);return m}
+function building(x,z,w,d,wall,roof){box(w,2.7,d,wall,x,1.35,z);box(w+.5,.36,d+.5,roof,x,2.9,z);box(1.2,1.8,.12,mats.brown,x,.9,z+d/2+.07);box(1.2,.8,.13,mats.glass,x-w*.27,1.7,z+d/2+.07)}
+function person(name,shirt,x,z){const root=new THREE.Group();root.position.set(x,0,z);const skin=name==='esined'?material('#a56a4c'):name==='jahde'?material('#86533e'):material('#9d674d');box(.65,.9,.38,shirt,0,1.18,0,root);const head=new THREE.Mesh(new THREE.SphereGeometry(.31,16,12),skin);head.position.y=1.94;root.add(head);box(.22,.75,.24,material('#25263e'),-.2,.4,0,root);box(.22,.75,.24,material('#25263e'),.2,.4,0,root);box(.18,.7,.23,skin,-.48,1.2,0,root);box(.18,.7,.23,skin,.48,1.2,0,root);if(name==='jay'){box(.68,.13,.63,material('#3c4048'),0,2.2,0,root)}else{const hair=new THREE.Mesh(new THREE.SphereGeometry(name==='jahde'?.4:.35,16,12),material('#24191c'));hair.position.set(0,2.15,0);root.add(hair)}root.userData={person:name};root.traverse(o=>o.userData.person=name);scene.add(root);characters[name]={root,destination:null,phase:Math.random()*5};return root}
+function init(){
+scene=new THREE.Scene();scene.background=new THREE.Color('#a1d4fa');scene.fog=new THREE.Fog('#a1d4fa',30,70);
+camera=new THREE.PerspectiveCamera(52,1,.1,100);raycaster=new THREE.Raycaster();renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'low-power'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.shadowMap.enabled=true;viewport.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight('#ffffff','#647c58',2.2));const sun=new THREE.DirectionalLight('#fff1cf',2.5);sun.position.set(-8,16,7);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-22;sun.shadow.camera.right=22;sun.shadow.camera.top=22;sun.shadow.camera.bottom=-22;scene.add(sun);
+ground=box(48,.15,48,mats.grass,0,-.13,0);ground.userData.ground=true;box(48,.04,4,mats.road,0,.015,0);box(4,.04,48,mats.road,0,.02,0);
+for(let i=-20;i<22;i+=5){box(2,.025,.07,mats.white,i,.06,0);box(.07,.025,2,mats.white,0,.07,i)}
+building(-8,-7,7,6,mats.wall,mats.purple);label('FIRST FAMILY LAUNDRY',-8,3.65,-3.93,1.15);
+building(8,-7,6,6,mats.home,mats.roof);label('FAMILY HOME',8,3.65,-3.92,.8);
+for(let i=0;i<3;i++){box(.95,1.3,.95,mats.steel,-10+i*1.5,.65,-3.15);box(.7,.7,.07,mats.glass,-10+i*1.5,.78,-2.65)}
+box(2,.65,1.2,mats.purple,-5,.6,6);box(1,.45,1.3,mats.glass,-5,1.15,6);for(const x of [-5.7,-4.3])for(const z of [5.45,6.55]){const tire=new THREE.Mesh(new THREE.CylinderGeometry(.29,.29,.16,12),material('#23242c'));tire.rotation.z=Math.PI/2;tire.position.set(x,.29,z);scene.add(tire)}
+box(1.8,.45,.8,mats.brown,9,.45,-3.3);box(2,.14,.9,mats.white,9,.76,-3.3);
+target('Washing machine',-10,-2.1,'#c4ff57','wash');target('Customer pickup',-5,3,'#ffd65e','pickup');target('Sofa',9,-2.5,'#7ed8ff','rest');target('Family conversation',5,-2,'#ffb1de','family');
+person('jay',mats.purple,-2,4);person('esined',material('#ed86b9'),2,5);person('jahde',material('#354c8a'),3,6);
+viewport.addEventListener('pointerup',tap);
+window.addEventListener('resize',resize);resize();$('world-loading').remove();animate();
 }
-function takeAction(a){
-const p=active(),roll=Math.random(),low=p.energy<25;
-if(a!=='rest'&&low){s.last=p.name+' is exhausted. Rest before attempting another demanding action.';render();return}
-let msg='';
-switch(a){
-case 'wash':p.energy=clamp(p.energy-18);if(roll<.22){s.cash-=12;s.rep=clamp(s.rep-4);msg='A washing mistake damaged an item. -$12 and -4 reputation.'}else{s.cash+=36;s.orders++;s.xp+=15;msg='Laundry finished and customer paid $36! +15 XP.'}break;
-case 'deliver':p.energy=clamp(p.energy-22);if(roll<.3){s.cash-=8;s.rep=clamp(s.rep-6);msg='Traffic caused a late delivery. -$8 fuel and -6 reputation.'}else{s.cash+=48;s.orders++;s.rep=clamp(s.rep+3);s.xp+=20;msg='On-time pickup and delivery! +$48, +3 reputation, +20 XP.'}break;
-case 'advertise':if(s.cash<20){msg='Not enough cash for advertising.';break}s.cash-=20;p.energy=clamp(p.energy-8);if(roll<.45){s.rep=clamp(s.rep+4);s.xp+=10;msg='Your flyers attracted attention! +4 reputation and +10 XP.'}else msg='The ad campaign cost $20 but brought no new customers today.';break;
-case 'customer':p.energy=clamp(p.energy-7);if(roll<.25){s.rep=clamp(s.rep-3);msg='The customer was unhappy with the conversation. -3 reputation.'}else{s.rep=clamp(s.rep+6);s.xp+=6;msg='A great conversation built customer trust. +6 reputation.'}break;
-case 'study':p.energy=clamp(p.energy-12);p.mood=clamp(p.mood+(roll<.35?-5:4));s.xp+=7;msg=p.name+' practiced new skills. +7 family XP.';break;
-case 'hobby':p.energy=clamp(p.energy-9);p.mood=clamp(p.mood+15);msg=p.name+' enjoyed a creative activity. +15 mood.';break;
-case 'sports':p.energy=clamp(p.energy-17);p.mood=clamp(p.mood+(roll<.2?-8:18));msg=roll<.2?'A tough game left '+p.name+' frustrated. -8 mood.':p.name+' had a great time playing sports! +18 mood.';break;
-case 'family':s.people.forEach(q=>q.mood=clamp(q.mood+9));p.energy=clamp(p.energy-6);msg='Family time lifted everyone’s mood! +9 each.';break;
-case 'rest':p.energy=clamp(p.energy+27);p.mood=clamp(p.mood+6);msg=p.name+' rested and recovered +27 energy.';break;
-}
-if(s.xp>=s.level*65){s.xp-=s.level*65;s.level++;msg+=' LEVEL UP! Level '+s.level+'.';if(s.level===5)msg+=' Cleaning is now available for future expansion.'}
-s.last=p.name+': '+msg;save();render();
-}
-$('start').onclick=()=>{$('intro').style.display='none';$('play').style.display='block';render()};
-$('sim-home').onclick=()=>{$('play').style.display='none';$('intro').style.display='block'};
-$('next-day').onclick=()=>{s.day++;s.people.forEach(p=>{p.energy=clamp(p.energy+24);p.mood=clamp(p.mood-3)});s.last='Day '+s.day+' begins. Everyone recovered some energy overnight.';save();render()};
-$('save').onclick=()=>{s.last=save()?'Game saved to this browser.':'Browser storage is unavailable.';render()};
-$('reset').onclick=()=>{if(!confirm('Start a new game? Your current progress will be lost.'))return;s=initial();save();render()};
-render();
-})();</script></html>
+function resize(){if(!renderer)return;const w=viewport.clientWidth,h=viewport.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false)}
+function tap(e){if(pending)return;const rect=renderer.domElement.getBoundingClientRect();const pointer=new THREE.Vector2((e.clientX-rect.left)/rect.width*2-1,-((e.clientY-rect.top)/rect.height*2-1));raycaster.setFromCamera(pointer,camera);const hits=raycaster.intersectObjects(scene.children,true);if(!hits.length)return;for(const hit of hits){let o=hit.object;while(o){if(o.userData.person){state.selected=o.userData.person;render();return}if(o.userData.action){walkTo(o.position,o.userData.action,o.userData.name);return}o=o.parent}}const plane=new THREE.Plane(new THREE.Vector3(0,1,0),0);const p=new THREE.Vector3();if(raycaster.ray.intersectPlane(plane,p))walkTo(p,null,null)}
+function walkTo(p,action,name){const ch=characters[state.selected];ch.destination=new THREE.Vector3(Math.max(-20,Math.min(20,p.x)),0,Math.max(-20,Math.min(20,p.z)));pending=action?{action,name}:null;message(action?'Walking to '+name+'…':'Walking through the neighborhood…')}
+function message(t){$('world-dialog').textContent=t}
+function finish(action){const p=state.people[state.selected],r=Math.random();let text='';if(p.energy<15&&action!=='rest'){text='Too tired. Rest before working.'}else if(action==='wash'){p.energy-=18;if(r<.25){state.cash-=10;state.rep=Math.max(0,state.rep-4);text='A machine jammed! Repair cost $10. Reputation -4.'}else{state.cash+=38;state.orders++;state.rep=Math.min(100,state.rep+2);text='Laundry washed and folded! Earned $38. Reputation +2.'}}else if(action==='pickup'){p.energy-=20;if(r<.3){state.cash-=7;state.rep=Math.max(0,state.rep-5);text='Traffic caused a late pickup. Fuel -$7, reputation -5.'}else{state.cash+=45;state.orders++;state.rep=Math.min(100,state.rep+3);text='Successful pickup and delivery! Earned $45.'}}else if(action==='rest'){p.energy=Math.min(100,p.energy+35);p.mood=Math.min(100,p.mood+8);text='Relaxed on the sofa. Energy +35, mood +8.'}else if(action==='family'){Object.values(state.people).forEach(q=>q.mood=Math.min(100,q.mood+12));text='A good family conversation! Everyone’s mood +12.'}p.energy=Math.max(0,p.energy);message(state.selected.toUpperCase()+': '+text);pending=null;save();render()}
+function animate(){requestAnimationFrame(animate);if(!started)return;const dt=Math.min(clock.getDelta(),.05),ch=characters[state.selected];for(const c of Object.values(characters)){if(c.destination){const d=c.destination.clone().sub(c.root.position);d.y=0;if(d.length()<.18){c.destination=null;if(c===ch&&pending)finish(pending.action)}else{d.normalize();c.root.position.addScaledVector(d,dt*3.2);c.root.rotation.y=Math.atan2(d.x,d.z);c.phase+=dt*12;c.root.children[0].rotation.z=Math.sin(c.phase)*.025}}}const focus=ch.root.position;const offset=new THREE.Vector3(Math.sin(orbit)*14,12,Math.cos(orbit)*17);camera.position.lerp(focus.clone().add(offset),.06);camera.lookAt(focus.x,1,focus.z);renderer.render(scene,camera)}
+function render(){document.querySelectorAll('[data-person]').forEach(b=>b.classList.toggle('chosen',b.dataset.person===state.selected));$('world-cash').textContent='$'+state.cash;$('world-energy').textContent=state.people[state.selected].energy;$('world-rep').textContent=state.rep;$('world-orders').textContent=state.orders}
+function save(){try{localStorage.setItem('tff-world-v1',JSON.stringify(state))}catch(e){}}
+$('start').addEventListener('click',()=>{$('intro').style.display='none';$('play').style.display='block';if(!started){started=true;init()}render()});
+$('world-home').onclick=()=>{$('play').style.display='none';$('intro').style.display='block'};
+document.querySelectorAll('[data-person]').forEach(b=>b.onclick=()=>{state.selected=b.dataset.person;message('Controlling '+b.textContent+'. Tap the ground or an interactive object.');render()});
+$('world-camera').onclick=()=>{orbit+=Math.PI/3};
+$('world-save').onclick=()=>{save();message('3D game progress saved to this browser.')};
+$('world-reset').onclick=()=>{if(!confirm('Restart your game?'))return;state=fresh();for(const [name,c] of Object.entries(characters)){c.root.position.set(name==='jay'?-2:name==='esined'?2:3,0,name==='jay'?4:name==='esined'?5:6);c.destination=null}save();render();message('New game started.')};
+</script></html>
