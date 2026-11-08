@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "index.html"
+      - "mobile-test.html"
       - "3d/**"
       - ".github/workflows/publish-site.yml"
   workflow_dispatch:
