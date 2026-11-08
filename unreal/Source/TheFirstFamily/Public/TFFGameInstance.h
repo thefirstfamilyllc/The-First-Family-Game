@@ -35,6 +35,10 @@ public:
     UFUNCTION(BlueprintCallable, Category="TFF|Characters") void UpdateAppearance(FTFFAppearance NewAppearance);
     UFUNCTION(BlueprintPure, Category="TFF|Progress") bool IsFeatureUnlocked(ETFFFeature Feature) const;
     UFUNCTION(BlueprintPure, Category="TFF|Progress") int32 UnlockLevel(ETFFFeature Feature) const;
+    UFUNCTION(BlueprintPure, Category="TFF|Branding") FText GetActiveBrandName() const;
+    UFUNCTION(BlueprintPure, Category="TFF|Branding") bool CanUpgradeBrandForCleaning() const;
+    UFUNCTION(BlueprintCallable, Category="TFF|Branding") bool UpgradeBrandForCleaning();
+    UPROPERTY(BlueprintReadOnly, Category="TFF|Branding") bool bCleaningBrandUpgraded = false;
     UFUNCTION(BlueprintCallable, Category="TFF|Progress") void SetLevel(int32 NewLevel);
     UFUNCTION(BlueprintCallable, Category="TFF|Progress") void ChangeCash(int32 Delta);
     UFUNCTION(BlueprintCallable, Category="TFF|Save") bool SaveProgress();
