@@ -103,14 +103,14 @@ sphere(g,gold,0,2.32,.285,.19,.07,.025);
 g.scale.setScalar(teen?.84:1);return g}
 const avatars=[make(0),make(1),make(2)];avatars.forEach(g=>scene.add(g));
 let selected=0,angle=0,drag=false,prev=0;
-function choose(i){selected=(i+3)%3;angle=0;avatars.forEach((g,j)=>{g.visible=j===selected;g.rotation.y=0;g.position.set(0,0,0)})}
+function choose(i){selected=(i+3)%3;angle=0;note.textContent='DRAG CHARACTER TO ROTATE 360°';avatars.forEach((g,j)=>{g.visible=j===selected;g.rotation.y=0;g.position.set(0,0,0)})}
 document.querySelectorAll('[data-i]').forEach(b=>b.addEventListener('click',()=>choose(Number(b.dataset.i))));
 document.getElementById('prev')?.addEventListener('click',()=>choose((selected+2)%3));
 document.getElementById('next')?.addEventListener('click',()=>choose((selected+1)%3));
-area.addEventListener('pointerdown',e=>{drag=true;prev=e.clientX;area.setPointerCapture(e.pointerId)});
-area.addEventListener('pointermove',e=>{if(!drag)return;angle+=(e.clientX-prev)*.012;prev=e.clientX;avatars[selected].rotation.y=angle});
+area.addEventListener('pointerdown',e=>{e.preventDefault();drag=true;prev=e.clientX;area.setPointerCapture(e.pointerId)});
+area.addEventListener('pointermove',e=>{if(!drag)return;e.preventDefault();angle+=(e.clientX-prev)*.018;prev=e.clientX;avatars[selected].rotation.y=angle;note.textContent='ROTATION '+Math.round(((angle*180/Math.PI)%360+360)%360)+'°'});
 area.addEventListener('pointerup',()=>drag=false);area.addEventListener('pointercancel',()=>drag=false);
 function resize(){const w=area.clientWidth,h=area.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}new ResizeObserver(resize).observe(area);resize();choose(0);
-function loop(){renderer.render(scene,camera);requestAnimationFrame(loop)}loop();
+let last=performance.now();function loop(now){const dt=Math.min((now-last)/1000,.1);last=now;if(!drag){angle+=dt*.55;avatars[selected].rotation.y=angle}renderer.render(scene,camera);requestAnimationFrame(loop)}requestAnimationFrame(loop);
 }catch(e){console.error(e);area.remove();note.textContent='3D VIEW UNAVAILABLE'}
 </script></body></html>
