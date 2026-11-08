@@ -139,35 +139,21 @@ func _build_hud() -> void:
     _update_stats()
 
 func _show_character_selection() -> void:
-    selection_panel = PanelContainer.new()
-    selection_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-    selection_panel.custom_minimum_size = Vector2(360, 290)
-    hud.add_child(selection_panel)
-    var content := VBoxContainer.new()
-    selection_panel.add_child(content)
-    var heading := Label.new()
-    heading.text = "THE FIRST FAMILY\nChoose your character"
-    heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    content.add_child(heading)
-    for character_name in ["Jay", "Esined", "Jahdē"]:
-        var button := Button.new()
-        button.text = character_name
-        button.custom_minimum_size.y = 54
-        button.pressed.connect(_choose_character.bind(character_name))
-        content.add_child(button)
+    var creator_script = preload("res://scripts/character_creator.gd")
+    var creator = creator_script.new()
+    hud.add_child(creator)
+    creator.confirmed.connect(_character_created.bind(creator))
 
-func _choose_character(character_name: String) -> void:
-    chosen_character = character_name
-    selection_panel.queue_free()
+func _character_created(profile: Dictionary, creator: Control) -> void:
+    creator.queue_free()
+    chosen_character = str(profile["name"])
     player = PlayerScript.new()
-    player.character_name = character_name
+    player.character_name = chosen_character
     player.position = Vector3(0, 1.1, 9)
     add_child(player)
     camera = player.camera_pivot.get_child(0) as Camera3D
-    # Age permissions belong to verified player accounts, not the chosen character.
-    # This prototype does not enable adult-only actions.
     adult_mode = false
-    status_label.text = "Playing as %s. Tap ground to walk; tap glowing circles to act." % character_name
+    status_label.text = "Welcome, %s! Tap to explore and build your empire." % chosen_character
     _update_stats()
 
 func _unhandled_input(event: InputEvent) -> void:
