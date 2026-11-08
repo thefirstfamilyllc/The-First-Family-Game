@@ -1,0 +1,27 @@
+; Engine configuration file.
+; The First Family: Build Your Empire
+config_version=5
+
+[application]
+config/name="The First Family: Build Your Empire"
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.3", "GL Compatibility")
+config/description="Your Life. Your Choices. Your Empire."
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
+environment/defaults/default_clear_color=Color(0.49, 0.77, 0.96, 1)
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+
+[input]
+move_forward={"deadzone":0.2,"events":[{"type":"InputEventKey","physical_keycode":87},{"type":"InputEventKey","physical_keycode":4194320}]}
+move_backward={"deadzone":0.2,"events":[{"type":"InputEventKey","physical_keycode":83},{"type":"InputEventKey","physical_keycode":4194322}]}
+move_left={"deadzone":0.2,"events":[{"type":"InputEventKey","physical_keycode":65},{"type":"InputEventKey","physical_keycode":4194319}]}
+move_right={"deadzone":0.2,"events":[{"type":"InputEventKey","physical_keycode":68},{"type":"InputEventKey","physical_keycode":4194321}]}
+interact={"deadzone":0.2,"events":[{"type":"InputEventKey","physical_keycode":69}]}
