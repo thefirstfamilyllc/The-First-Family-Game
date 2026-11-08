@@ -21,6 +21,19 @@ int32 UTFFGameInstance::UnlockLevel(ETFFFeature Feature) const
     }
 }
 bool UTFFGameInstance::IsFeatureUnlocked(ETFFFeature Feature) const { return Level >= UnlockLevel(Feature); }
+FText UTFFGameInstance::GetActiveBrandName() const
+{
+    return FText::FromString(bCleaningBrandUpgraded && CanUpgradeBrandForCleaning()
+        ? TEXT("The First Family Laundry & Cleaning")
+        : TEXT("The First Family Pick-Up & Delivery Laundry Service"));
+}
+bool UTFFGameInstance::CanUpgradeBrandForCleaning() const { return Level >= 5; }
+bool UTFFGameInstance::UpgradeBrandForCleaning()
+{
+    if (!CanUpgradeBrandForCleaning()) return false;
+    bCleaningBrandUpgraded = true;
+    return SaveProgress();
+}
 void UTFFGameInstance::SetLevel(int32 NewLevel) { Level = FMath::Max(1, NewLevel); }
 void UTFFGameInstance::ChangeCash(int32 Delta) { Cash = FMath::Max(0, Cash + Delta); }
 bool UTFFGameInstance::SaveProgress()
