@@ -113,6 +113,21 @@ $('start').onclick=()=>{playing=true;if(animatedModel){animatedModel.visible=tru
 $('back').onclick=()=>{playing=false;if(animatedModel){animatedModel.visible=true;civilian.visible=false}else{civilian.visible=true}refresh();document.body.classList.remove('playing');fitStage();avatar.position.set(0,0,0)};
 const movement={left:false,right:false,forward:false};for(const k of Object.keys(movement)){const el=$(k);el.addEventListener('pointerdown',e=>{e.preventDefault();movement[k]=true;el.setPointerCapture(e.pointerId)});for(const ev of ['pointerup','pointercancel','lostpointercapture'])el.addEventListener(ev,()=>movement[k]=false)}
 window.addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='w')movement.forward=true;if(e.key==='ArrowLeft'||e.key==='a')movement.left=true;if(e.key==='ArrowRight'||e.key==='d')movement.right=true});window.addEventListener('keyup',e=>{if(e.key==='ArrowUp'||e.key==='w')movement.forward=false;if(e.key==='ArrowLeft'||e.key==='a')movement.left=false;if(e.key==='ArrowRight'||e.key==='d')movement.right=false});
-let last=performance.now();function animate(now){requestAnimationFrame(animate);let dt=Math.min((now-last)/1000,.05);last=now;if(mixer)mixer.update(dt);if(walkAction&&idleAction){const moving=playing&&movement.forward;walkAction.setEffectiveWeight(moving?1:0);idleAction.setEffectiveWeight(moving?0:1)}if(playing){if(movement.left)avatar.rotation.y+=dt*2.4;if(movement.right)avatar.rotation.y-=dt*2.4;if(movement.forward){avatar.position.x-=Math.sin(avatar.rotation.y)*dt*4;avatar.position.z-=Math.cos(avatar.rotation.y)*dt*4}camera.clearViewOffset();camera.position.lerp(new THREE.Vector3(avatar.position.x+4,avatar.position.y+4.4,avatar.position.z+8),.09);camera.lookAt(avatar.position.x,1.5,avatar.position.z)}renderer.render(scene,camera)}requestAnimationFrame(animate);
+// Motion is layered onto the existing scene without changing the approved layout or camera.
+const restY=civilian.position.y;
+let blinkAt=1.6,blinkUntil=0;
+function characterIdle(t){
+  if(!playing && civilian.visible){
+    civilian.position.y=restY+Math.sin(t*1.8)*.014;
+    civilian.rotation.z=Math.sin(t*.9)*.008;
+    const blink=t<blinkUntil?0.12:1;
+    if(t>blinkAt){blinkUntil=t+.13;blinkAt=t+2.7+Math.random()*2.5}
+    for(const eye of irisParts)eye.scale.y=blink;
+  }else{civilian.position.y=restY;civilian.rotation.z=0}
+  if(animatedModel && animatedModel.visible && !playing){
+    animatedModel.rotation.y=Math.sin(t*.45)*.045;
+  }
+}
+let last=performance.now();function animate(now){requestAnimationFrame(animate);let dt=Math.min((now-last)/1000,.05);last=now;characterIdle(now/1000);if(mixer)mixer.update(dt);if(walkAction&&idleAction){const moving=playing&&movement.forward;walkAction.setEffectiveWeight(moving?1:0);idleAction.setEffectiveWeight(moving?0:1)}if(playing){if(movement.left)avatar.rotation.y+=dt*2.4;if(movement.right)avatar.rotation.y-=dt*2.4;if(movement.forward){avatar.position.x-=Math.sin(avatar.rotation.y)*dt*4;avatar.position.z-=Math.cos(avatar.rotation.y)*dt*4}camera.clearViewOffset();camera.position.lerp(new THREE.Vector3(avatar.position.x+4,avatar.position.y+4.4,avatar.position.z+8),.09);camera.lookAt(avatar.position.x,1.5,avatar.position.z)}renderer.render(scene,camera)}requestAnimationFrame(animate);
 addEventListener('resize',()=>{fitStage()});
 </script></body></html>
