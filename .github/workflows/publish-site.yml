@@ -6,6 +6,7 @@ on:
     paths:
       - "index.html"
       - "page2-test.html"
+      - "page2.html"
       - "character-selection.html"
       - "mobile-test.html"
       - "3d/**"
