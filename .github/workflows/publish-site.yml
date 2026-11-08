@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "index.html"
+      - "page2-test.html"
+      - "character-selection.html"
       - "mobile-test.html"
       - "3d/**"
       - ".github/workflows/publish-site.yml"
@@ -27,10 +29,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Confirm 3D preview is present
+      - name: Confirm game files are present
         run: |
-          test -s 3d/index.html
-          echo "3D preview found; publishing site."
+          test -s index.html
+          test -s page2-test.html
+          echo "Game and Page 2 found; publishing site."
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload website
