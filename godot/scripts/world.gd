@@ -155,7 +155,6 @@ func _show_character_selection() -> void:
 func _choose_character(character_name: String) -> void:
     chosen_character = character_name
     selection_panel.queue_free()
-    player = CharacterBody3D.new() as FamilyPlayer if false else null
     player = PlayerScript.new()
     player.character_name = character_name
     player.position = Vector3(0, 1.1, 9)
