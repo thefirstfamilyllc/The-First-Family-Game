@@ -6,6 +6,8 @@
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 void UTFFMenuWidget::NativeConstruct()
 {
@@ -34,6 +36,7 @@ void UTFFMenuWidget::ShowMainMenu()
 {
  ClearAndTitle(TEXT("THE FIRST FAMILY - BUILD YOUR EMPIRE"));
  AddButton(TEXT("PLAY GAME"))->OnClicked.AddDynamic(this, &UTFFMenuWidget::ShowCharacterSelection);
+ AddButton(TEXT("NEW GAME"))->OnClicked.AddDynamic(this, &UTFFMenuWidget::ShowCharacterSelection);
 }
 void UTFFMenuWidget::ShowCharacterSelection()
 {
@@ -88,6 +91,10 @@ void UTFFMenuWidget::EnterWorld()
 {
  if (auto* PC = GetOwningPlayer())
  {
+  if (ACharacter* Character = Cast<ACharacter>(PC->GetPawn()))
+  {
+   Character->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+  }
   PC->SetInputMode(FInputModeGameOnly());
   PC->bShowMouseCursor = false;
  }
