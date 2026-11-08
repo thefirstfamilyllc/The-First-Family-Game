@@ -38,5 +38,45 @@ function openControls(tab){
  updatePortrait();
 }
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>openControls(b.dataset.tab));
+
+// The approved illustration has painted-on controls; provide actual touch targets
+// over every visible category and row instead of only the top navigation.
+const categories=[
+ ['Face',60.5,22.2,12.7,6.5,'Appearance'],
+ ['Hair',60.5,29.3,12.7,6.1,'Hair'],
+ ['Facial Hair',60.5,35.5,12.7,6.4,'Facial Hair'],
+ ['Skin Tone',60.5,42.2,12.7,6.4,'Appearance'],
+ ['Eyes',60.5,49,12.7,6.4,'Eyes'],
+ ['Eyebrows',60.5,55.6,12.7,6.4,'Eyebrows'],
+ ['Piercings',60.5,62.3,12.7,6.4,'Piercings'],
+ ['Accessories',60.5,69,12.7,6.4,'Gear'],
+ ['Build',60.5,75.7,12.7,6.4,'Build']
+];
+Object.assign(config,{
+ Hair:{label:'Hairstyle',key:'hair',values:['Short','Braids','Afro','Locs','Fade']},
+ 'Facial Hair':{label:'Facial hair',key:'facialHair',values:['None','Stubble','Beard','Goatee']},
+ Eyes:{label:'Eye color',key:'eyeColor',values:['Brown','Hazel','Green','Blue']},
+ Eyebrows:{label:'Eyebrow style',key:'brows',values:['Natural','Thick','Arched','Straight']},
+ Piercings:{label:'Piercings',key:'piercings',values:['None','Stud','Hoop']},
+ Build:{label:'Build',key:'build',values:['Slim','Average','Athletic','Broad']}
+});
+function addHit(name,x,y,w,h,fn){
+ const b=document.createElement('button');b.type='button';b.className='hit';b.setAttribute('aria-label',name);
+ b.style.cssText='position:absolute;z-index:6;left:'+x+'%;top:'+y+'%;width:'+w+'%;height:'+h+'%;background:transparent;border:0;cursor:pointer;touch-action:manipulation';
+ b.onclick=fn;document.querySelector('.stage').append(b);return b;
+}
+categories.forEach(([name,x,y,w,h,tab])=>addHit('Customize '+name,x,y,w,h,()=>openControls(tab)));
+for(let i=0;i<5;i++){
+ addHit('Choose face '+(i+1),74.2+i*5,23.4,4.7,10,()=>{customize.face=i;openControls('Appearance');notify('Face '+(i+1)+' selected; 3D face editing is not ready')});
+ addHit('Choose skin tone '+(i+1),74.2+i*5,40.8,4.7,7.4,()=>{customize.skin=i;openControls('Appearance')});
+ addHit('Choose hairstyle '+(i+1),74.2+i*5,57.7,4.7,9.8,()=>{customize.hair=i;openControls('Hair')});
+ addHit('Choose hair color '+(i+1),74.2+i*5,73.6,4.7,7.2,()=>{customize.hairColor=i;openControls('Style')});
+}
+const originalOpenControls=openControls;
+openControls=function(tab){
+ const c=config[tab];if(c && customize[c.key]===undefined)customize[c.key]=0;
+ originalOpenControls(tab);
+};
 const oldChoose=choose;choose=function(i){oldChoose(i);updatePortrait()};
+
 </script></body></html>
