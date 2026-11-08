@@ -42,17 +42,46 @@
 (()=>{'use strict';const $=id=>document.getElementById(id);document.documentElement.style.setProperty('--approved-art',getComputedStyle($('start')).backgroundImage.match(/url\((.*?)\)/)?.[0]||'none');let character='Jay',outfit='Purple',cash=5000,level=1,stage=0,completed=0,px=0,pz=4,ready=false,activeSlot=null,sessionUpgrades={washer:0,dryer:0},scene,camera,renderer,avatar,clock,targets=[],keys=new Set(),joy={x:0,y:0};const stages=['Collect laundry','Start washing','Move to dryer','Fold clothing','Pack order','Deliver laundry'];const colors={Purple:0x7736a8,Green:0x206b42,Black:0x24232a};const stations=[[-5,-3,'PICKUP'],[-2,-3,'WASHER'],[1,-3,'DRYER'],[4,-3,'FOLD'],[4,3,'PACK'],[-5,3,'DELIVER']];function show(id){['start','select','custom','game','settingsPage','creditsPage','storePage','exitPage','loadPage','newPage'].forEach(k=>$(k).hidden=k!==id);if(id==='select')requestAnimationFrame(()=>startCharacterPreview('characterPreview'))}
 const previewNames=['Jay','Esined','Jahdē'];let previewIndex=0,previewHat=false,previewHair=0,previewScene=null,previewCamera=null,previewRenderer=null,previewModel=null,previewCanvas=null,previewAngle=0,previewRunning=false,previewDrag=null;
 function cycleCharacter(dir){previewIndex=(previewIndex+dir+3)%3;$('selectedCharacterName').textContent=previewNames[previewIndex].toUpperCase();previewHat=false;previewHair=0;rebuildPreview()}
-function previewPart(group,geometry,color,x,y,z){const mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({color,roughness:.72}));mesh.position.set(x,y,z);group.add(mesh);return mesh}
-function rebuildPreview(){if(!previewScene||!window.THREE)return;if(previewModel)previewScene.remove(previewModel);const name=previewCanvas&&previewCanvas.id==='customPreview'?character:previewNames[previewIndex],isJay=name==='Jay',isEsined=name==='Esined';const height=isJay?1:0.88;const skin=isJay?0x865136:isEsined?0xa86b49:0x965b3d;const outfitColor=previewCanvas&&previewCanvas.id==='customPreview'?colors[outfit]:(isJay?0x66228d:isEsined?0x1d1b29:0x1c6a40);const g=new THREE.Group();previewModel=g;previewScene.add(g);
-const cyl=(rt,rb,h)=>new THREE.CylinderGeometry(rt,rb,h,14),sphere=(r)=>new THREE.SphereGeometry(r,16,12);
-previewPart(g,cyl(.19,.16,.69),outfitColor,0,1.18*height,0);
-previewPart(g,sphere(.175),skin,0,1.77*height,0);
-previewPart(g,cyl(.07,.08,.15),skin,0,1.58*height,0);
-for(const side of [-1,1]){const arm=previewPart(g,cyl(.073,.058,.56),outfitColor,side*.24,1.18*height,0);arm.rotation.z=side*.13;previewPart(g,sphere(.064),skin,side*.28,.87*height,0);previewPart(g,cyl(.084,.065,.66),outfitColor,side*.105,.49*height,0);previewPart(g,new THREE.BoxGeometry(.15,.11,.27),0xffffff,side*.105,.13*height,.07)}
-previewPart(g,new THREE.BoxGeometry(.18,.055,.025),0xe5ba45,0,1.36*height,.17);
-if(!isJay){const hair=previewPart(g,sphere(previewHair===2?.23:.19),0x191115,0,1.88*height,-.01);hair.scale.y=previewHair===1?1.35:.6;if(isEsined&&previewHair!==2){previewPart(g,sphere(.14),0x191115,.14,1.94*height,-.07)}}
-if(previewHat){previewPart(g,cyl(.2,.2,.12),outfitColor,0,1.94*height,0);previewPart(g,new THREE.BoxGeometry(.32,.025,.22),outfitColor,0,1.89*height,.11)}
-g.scale.setScalar(1.1);g.rotation.y=previewAngle;
+function previewPart(group,geometry,color,x,y,z,metalness=0){const mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({color,roughness:metalness?.3:.78,metalness}));mesh.position.set(x,y,z);mesh.castShadow=true;group.add(mesh);return mesh}
+function rebuildPreview(){
+if(!previewScene||!window.THREE)return;
+if(previewModel){previewScene.remove(previewModel);previewModel.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose()})}
+const name=previewCanvas&&previewCanvas.id==='customPreview'?character:previewNames[previewIndex];
+const jay=name==='Jay',girl=name==='Esined',boy=!jay&&!girl,scale=jay?1:girl?.86:.92;
+const skin=jay?0x925b40:girl?0xa66b4c:0x996346,shirt=previewCanvas&&previewCanvas.id==='customPreview'?colors[outfit]:jay?0x60218a:girl?0x211d28:0x17613d;
+const g=new THREE.Group();previewModel=g;previewScene.add(g);
+const sph=(r)=>new THREE.SphereGeometry(r,24,16),box=(w,h,d)=>new THREE.BoxGeometry(w,h,d),cyl=(top,bottom,h)=>new THREE.CylinderGeometry(top,bottom,h,16);
+const part=(geo,col,x,y,z,m)=>previewPart(g,geo,col,x,y,z,m);
+const ball=(x,y,z,rx,ry,rz,col)=>{const p=part(sph(1),col,x,y,z);p.scale.set(rx,ry,rz);return p};
+const tube=(x1,y1,z1,x2,y2,z2,r1,r2,col)=>{const d=new THREE.Vector3(x2-x1,y2-y1,z2-z1),p=part(cyl(r1,r2,d.length()),col,(x1+x2)/2,(y1+y2)/2,(z1+z2)/2);p.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());return p};
+const gold=0xe4b34e,hair=0x171019,sole=0xf1f0f5;
+ball(0,.98,0,.235,.19,.135,shirt);ball(0,1.30,0,.29,.39,.16,shirt);
+ball(0,1.53,0,.15,.08,.12,skin);ball(0,1.76,.015,.173,.215,.15,skin);
+for(const side of [-1,1]){
+ball(side*.17,1.77,0,.038,.063,.032,skin);
+ball(side*.066,1.785,.148,.037,.022,.016,0xf7eee8);
+ball(side*.068,1.787,.162,.017,.019,.01,0x261913);
+tube(side*.24,1.43,0,side*.32,1.12,.02,.095,.073,shirt);
+tube(side*.32,1.12,.02,side*.30,.86,.12,.073,.056,shirt);
+ball(side*.30,.83,.12,.064,.09,.05,skin);
+tube(side*.13,.85,0,side*.14,.46,0,.125,.09,shirt);
+tube(side*.14,.46,0,side*.15,.16,.025,.093,.07,shirt);
+ball(side*.15,.10,.115,.115,.095,.205,sole);
+part(box(.018,.44,.013),gold,side*.14,.55,.115);
+}
+ball(0,1.735,.162,.042,.064,.045,skin);
+ball(0,1.658,.142,.076,.018,.023,0x6c332f);
+if(jay){ball(0,1.61,.125,.105,.078,.07,hair);ball(0,1.65,.18,.065,.014,.01,0x4c241d)}
+else{
+const cap=ball(0,1.945,-.008,.18,.085,.158,hair);
+if(girl){for(let i=0;i<14;i++){const theta=i*2.4,rad=.085+(i%3)*.025;ball(Math.cos(theta)*rad,1.97+(i%5)*.033,Math.sin(theta)*rad-.02,.046,.072,.047,hair)}if(previewHair!==2){for(const side of [-1,1]){for(let j=0;j<4;j++)tube(side*(.14+j*.014),1.91,-.03,side*(.19+j*.012),1.15+j*.03,-.06,.015,.012,hair)}}}
+else{for(let i=0;i<20;i++){const t=i*2.4;ball(Math.sin(t)*.14,1.96+(i%4)*.03,Math.cos(t)*.12,.057,.062,.055,hair)}}
+if(previewHair===1)ball(0,2.03,-.05,.14,.13,.14,hair);
+}
+part(box(.16,.04,.015),gold,0,1.39,.167,.6);
+for(const side of [-1,1]){part(box(.014,.53,.012),gold,side*.19,1.29,.16)}
+if(previewHat){part(cyl(.185,.185,.12),shirt,0,1.975,0);part(box(.32,.024,.22),shirt,0,1.925,.13)}
+g.scale.setScalar(scale*1.15);g.rotation.y=previewAngle;
 }
 function startCharacterPreview(id){if(!window.THREE)return;const canvas=$(id);if(!canvas||canvas.closest('section').hidden)return;if(previewCanvas===canvas&&previewRenderer){rebuildPreview();return}if(previewRenderer){previewRenderer.dispose();previewRenderer.forceContextLoss()}previewCanvas=canvas;previewScene=new THREE.Scene();previewCamera=new THREE.PerspectiveCamera(34,1,.1,100);previewCamera.position.set(0,1.05,5.2);previewCamera.lookAt(0,1.05,0);previewScene.add(new THREE.HemisphereLight(0xffffff,0x5b3781,2));const light=new THREE.DirectionalLight(0xffffff,2);light.position.set(3,5,4);previewScene.add(light);previewRenderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});previewRenderer.setPixelRatio(Math.min(devicePixelRatio,1.5));previewAngle=0;rebuildPreview();if(!previewRunning){previewRunning=true;requestAnimationFrame(previewFrame)}}
 function previewFrame(){if(!previewRunning)return;requestAnimationFrame(previewFrame);if(!previewRenderer||!previewCanvas||previewCanvas.closest('section').hidden)return;const w=previewCanvas.clientWidth,h=previewCanvas.clientHeight;if(w<1||h<1)return;if(previewCanvas.width!==Math.round(w*previewRenderer.getPixelRatio())||previewCanvas.height!==Math.round(h*previewRenderer.getPixelRatio())){previewRenderer.setSize(w,h,false);previewCamera.aspect=w/h;previewCamera.updateProjectionMatrix()}if(previewDrag===null)previewAngle+=.006;if(previewModel)previewModel.rotation.y=previewAngle;previewRenderer.render(previewScene,previewCamera)}
