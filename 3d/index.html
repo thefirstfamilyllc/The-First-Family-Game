@@ -95,6 +95,21 @@ function updateButtons(){for(const key of Object.keys(choiceButtons))choiceButto
 updateButtons();
 const incomingCharacter=Number(new URLSearchParams(location.search).get('character')??sessionStorage.getItem('tffSelectedCharacter')??0);
 if(Number.isInteger(incomingCharacter)&&incomingCharacter>=0&&incomingCharacter<3)chooseFamily(incomingCharacter);
+try{
+ const saved=JSON.parse(sessionStorage.getItem('tffCustomization')||'null');
+ if(saved&&typeof saved==='object'){
+  const assign=(key,value,length)=>{if(Number.isInteger(value)&&value>=0&&value<length)state[key]=value};
+  assign('skin',saved.skin,choices.skin.length);
+  assign('hairStyle',saved.hair,choices.hairStyle.length);
+  assign('hairColor',saved.hairColor,choices.hairColor.length);
+  assign('outfit',saved.outfit,choices.outfit.length);
+  assign('eyes',saved.eyeColor,choices.eyes.length);
+  assign('face',saved.face,choices.face.length);
+  assign('build',saved.build,choices.build.length);
+  refresh();updateButtons();
+ }
+}catch(e){console.warn('Could not restore character appearance',e)}
+
 let hLabel=document.createElement('label');hLabel.textContent='Height';$('fields').append(hLabel);let slider=document.createElement('input');slider.type='range';slider.min='.8';slider.max='1.2';slider.step='.05';slider.value='1';slider.oninput=()=>{state.height=+slider.value;refresh()};$('fields').append(slider);
 function recolor(mesh,color){mesh.material.color.set(color)}
 function refresh(){if(animatedModel){animatedModel.visible=true;if(playing){animatedModel.traverse(o=>{if(o.isMesh&&o.material){const n=o.name.toLowerCase();if(n.includes('body')||n.includes('shirt')||n.includes('torso')){o.material=o.material.clone();o.material.color.set(choices.outfit[state.outfit])}}});animatedModel.scale.setScalar(state.height)}}recolor(head,choices.skin[state.skin]);ears.forEach(e=>{recolor(e,choices.skin[state.skin]);e.scale.x=[.4,.6,.85][state.ears]});recolor(hair,choices.hairColor[state.hairColor]);hair.visible=!modelLoaded&&state.hairStyle!==4;hair.scale.y=[.48,.75,1.12,1.4,0][state.hairStyle];hair.position.y=state.hairStyle===3?2.49:2.62;head.scale.x=[.84,1,1.18][state.face];eyes.forEach(e=>recolor(e,choices.eyes[state.eyes]));body.scale.x=[.75,1,1.28][state.build];[body,...arms].forEach(m=>recolor(m,choices.outfit[state.outfit]));skinParts.forEach(m=>m.material.color.set(choices.skin[state.skin]));shirtParts.forEach(m=>m.material.color.set(choices.outfit[state.outfit]));hairParts.forEach(m=>{m.material.color.set(choices.hairColor[state.hairColor]);m.visible=state.hairStyle!==4;m.scale.y=state.hairStyle===2?1.7:state.hairStyle===3?1.45:1});irisParts.forEach(m=>m.material.color.set(choices.eyes[state.eyes]));face.scale.x=[.77,.89,1.04][state.face];leftEar.scale.x=rightEar.scale.x=[.4,.6,.9][state.ears];shirtParts[0].scale.x=[.83,1,1.17][state.build];civilian.scale.y=state.height;avatar.scale.y=1}refresh();
