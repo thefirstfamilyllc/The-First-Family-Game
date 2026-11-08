@@ -68,6 +68,13 @@ civilian.visible=true;
 const choices={template:['Jay','Esined','Jahdē'],skin:['#f4d5bd','#cf9977','#956446','#603e32','#392721'],hairStyle:['Short','Curly','Afro','Long','Bald'],hairColor:['#211b1a','#6b3f25','#b78b55','#d8d1c7','#8d49bd','#4c8aab'],eyes:['#5c3824','#3d765c','#507ab0','#888888','#241e1a'],face:['Narrow','Balanced','Wide'],ears:['Small','Medium','Large'],build:['Slim','Average','Broad'],outfit:['#713fa7','#2e343d','#89bb4b','#d94e76','#e5a43e']};
 const labels={template:'Starting character',skin:'Skin shade',hairStyle:'Hair style',hairColor:'Hair color',eyes:'Eye color',face:'Face shape',ears:'Ear size',build:'Body build',outfit:'Outfit color'};
 const state={template:0,name:'Jay',skin:2,hairStyle:0,hairColor:0,eyes:0,face:1,ears:1,build:1,outfit:0,height:1};
+const familyPresets=[
+ {name:'Jay',skin:2,hairStyle:0,hairColor:0,eyes:0,face:1,ears:1,build:1,outfit:0,height:1},
+ {name:'Esined',skin:2,hairStyle:1,hairColor:1,eyes:0,face:1,ears:1,build:0,outfit:0,height:.82},
+ {name:'Jahdē',skin:2,hairStyle:2,hairColor:0,eyes:0,face:1,ears:1,build:0,outfit:0,height:.96}
+];
+function chooseFamily(i){Object.assign(state,familyPresets[i],{template:i});nameInput.value=state.name;slider.value=state.height;refresh();updateButtons()}
+
 // Visual choices: tapping a swatch or tile updates the visible avatar immediately.
 let nameLabel=document.createElement('label');nameLabel.textContent='Character name';$('fields').append(nameLabel);
 let nameInput=document.createElement('input');nameInput.id='f_name';nameInput.maxLength=32;nameInput.value=state.name;nameInput.oninput=()=>state.name=nameInput.value;$('fields').append(nameInput);
@@ -80,7 +87,7 @@ for(const key of Object.keys(choices)){
   const b=document.createElement('button');b.type='button';b.className='choice'+(v.startsWith('#')?' swatch':'');
   if(v.startsWith('#')){b.style.backgroundColor=v;b.title=labels[key]+' '+(i+1);b.setAttribute('aria-label',b.title)}
   else b.textContent=v;
-  b.onclick=()=>{state[key]=i;if(key==='template'){state.name=choices.template[i];nameInput.value=state.name}refresh();updateButtons()};
+  b.onclick=()=>{state[key]=i;if(key==='template'){chooseFamily(i)}else{refresh();updateButtons()}};
   choiceButtons[key].push(b);grid.append(b);
  });$('fields').append(grid);
 }
@@ -114,12 +121,12 @@ $('back').onclick=()=>{playing=false;if(animatedModel){animatedModel.visible=tru
 const movement={left:false,right:false,forward:false};for(const k of Object.keys(movement)){const el=$(k);el.addEventListener('pointerdown',e=>{e.preventDefault();movement[k]=true;el.setPointerCapture(e.pointerId)});for(const ev of ['pointerup','pointercancel','lostpointercapture'])el.addEventListener(ev,()=>movement[k]=false)}
 window.addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='w')movement.forward=true;if(e.key==='ArrowLeft'||e.key==='a')movement.left=true;if(e.key==='ArrowRight'||e.key==='d')movement.right=true});window.addEventListener('keyup',e=>{if(e.key==='ArrowUp'||e.key==='w')movement.forward=false;if(e.key==='ArrowLeft'||e.key==='a')movement.left=false;if(e.key==='ArrowRight'||e.key==='d')movement.right=false});
 // Motion is layered onto the existing scene without changing the approved layout or camera.
-const restY=civilian.position.y;
+const restY=civilian.position.y;const restRot=avatar.rotation.y;
 let blinkAt=1.6,blinkUntil=0;
 function characterIdle(t){
   if(!playing && civilian.visible){
     civilian.position.y=restY+Math.sin(t*1.8)*.014;
-    civilian.rotation.z=Math.sin(t*.9)*.008;
+    civilian.rotation.z=Math.sin(t*.9)*.008;avatar.rotation.y=restRot+Math.sin(t*.36)*.045;
     const blink=t<blinkUntil?0.12:1;
     if(t>blinkAt){blinkUntil=t+.13;blinkAt=t+2.7+Math.random()*2.5}
     for(const eye of irisParts)eye.scale.y=blink;
