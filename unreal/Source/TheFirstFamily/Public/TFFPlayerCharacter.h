@@ -12,6 +12,8 @@ public:
     virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
     UFUNCTION(BlueprintCallable, Category="TFF|Movement") void SetMovementEnabled(bool bEnabled);
 private:
+    UPROPERTY(VisibleAnywhere) class UTFFInteractionComponent* Interaction;
+    void Interact();
     void MoveForward(float Value);
     void MoveRight(float Value);
     void StartSprint();
