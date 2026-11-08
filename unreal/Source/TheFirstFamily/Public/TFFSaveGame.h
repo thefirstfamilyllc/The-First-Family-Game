@@ -14,4 +14,5 @@ public:
     UPROPERTY() ETFFCharacter Character = ETFFCharacter::Jay;
     UPROPERTY() bool bAccepted = false;
     UPROPERTY() FTFFAppearance Appearance;
+    UPROPERTY() bool bCleaningBrandUpgraded = false;
 };
