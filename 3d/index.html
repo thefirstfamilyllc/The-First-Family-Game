@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>The First Family — 3D Character Studio</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#111727;color:#fff;font-family:system-ui,-apple-system,sans-serif;overflow:hidden}#view{position:absolute;inset:0;width:100%;height:100%;touch-action:none}#ui{position:absolute;top:12px;left:12px;bottom:12px;width:min(330px,calc(100vw - 24px));background:#151b2be8;border:1px solid #ffffff30;border-radius:18px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 15px 50px #0007}header{padding:14px 16px 8px;background:#20263b}header strong{font-size:18px}header small{display:block;color:#bbf47c;margin-top:3px}#fields{overflow-y:auto;padding:8px 16px 18px;flex:1}label{display:block;font-size:12px;color:#d2d6e6;margin:10px 0 4px}select,input{width:100%;border-radius:9px;background:#303950;border:1px solid #65708a;color:white;padding:10px;font-size:15px}button{border:0;border-radius:11px;background:#a6ee4d;color:#182314;font-weight:800;padding:14px;font-size:15px;cursor:pointer}#start{margin:10px 16px 14px}#tip{position:absolute;right:15px;top:14px;background:#13192acc;border-radius:12px;padding:10px 12px;font-size:12px;max-width:160px}#status{position:absolute;bottom:16px;right:15px;background:#161d2edb;border-radius:12px;padding:12px;max-width:260px;font-size:13px}#back{position:absolute;top:14px;left:14px;display:none}body.playing #ui{display:none}body.playing #tip{display:none}body.playing #back{display:block}#move{display:none;position:absolute;bottom:20px;left:20px;gap:10px}body.playing #move{display:flex}#move button{background:#ffffffc7;padding:16px;font-size:18px}@media(max-width:700px){#ui{width:54vw;min-width:190px}header strong{font-size:15px}#tip{max-width:120px;font-size:11px}#status{bottom:90px}#fields{padding:7px 10px}#start{margin:8px 10px}select,input{padding:8px}label{margin-top:7px}}
-</style></head><body>
+ .choice-grid{display:flex;gap:7px;flex-wrap:wrap;margin:7px 0 12px}.choice{min-width:38px;min-height:38px;padding:7px 10px;border:2px solid #73809b;border-radius:11px;background:#343e58;color:white;font-size:12px}.choice.selected{border-color:#b6ff69;box-shadow:0 0 0 2px #b6ff6955}.choice.swatch{width:40px;height:40px;padding:0;border-radius:50%}#ui{width:min(365px,calc(100vw - 24px))}@media(max-width:700px){#ui{width:min(245px,62vw)}.choice{min-width:34px;min-height:34px;padding:6px}} </style></head><body>
 <canvas id="view"></canvas><div id="tip">Drag the 3D view to rotate your character.</div><section id="ui"><header><strong>THE FIRST FAMILY</strong><small>Build Your Empire · 3D Character Studio</small></header><div id="fields"></div><button id="start">START MY LIFE</button></section><button id="back">CUSTOMIZE</button><div id="move"><button id="left">◀</button><button id="forward">▲</button><button id="right">▶</button></div><div id="status">Loading the upgraded animated 3D character…</div>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"}}</script>
 <script type="module">
@@ -30,11 +30,27 @@ hair=sphere(avatar,.36,'#251c19',0,2.62,0,1,0.48,1);
 const choices={template:['Jay','Esined','Jahdē'],skin:['#f4d5bd','#cf9977','#956446','#603e32','#392721'],hairStyle:['Short','Curly','Afro','Long','Bald'],hairColor:['#211b1a','#6b3f25','#b78b55','#d8d1c7','#8d49bd','#4c8aab'],eyes:['#5c3824','#3d765c','#507ab0','#888888','#241e1a'],face:['Narrow','Balanced','Wide'],ears:['Small','Medium','Large'],build:['Slim','Average','Broad'],outfit:['#713fa7','#2e343d','#89bb4b','#d94e76','#e5a43e']};
 const labels={template:'Starting character',skin:'Skin shade',hairStyle:'Hair style',hairColor:'Hair color',eyes:'Eye color',face:'Face shape',ears:'Ear size',build:'Body build',outfit:'Outfit color'};
 const state={template:0,name:'Jay',skin:2,hairStyle:0,hairColor:0,eyes:0,face:1,ears:1,build:1,outfit:0,height:1};
-for(const key of Object.keys(choices)){let l=document.createElement('label');l.textContent=labels[key];$('fields').append(l);let s=document.createElement('select');s.id='f_'+key;choices[key].forEach((v,i)=>{let o=document.createElement('option');o.value=i;o.textContent=v.startsWith('#')?({skin:['Light','Tan','Brown','Deep brown','Dark'],hairColor:['Black','Brown','Blonde','Silver','Purple','Blue'],eyes:['Brown','Green','Blue','Gray','Dark'],outfit:['Purple','Charcoal','Green','Pink','Gold']}[key][i]):v;s.append(o)});s.value=state[key];s.onchange=()=>{state[key]=+s.value;if(key==='template'){state.name=choices.template[state.template];$('f_name').value=state.name}refresh()};$('fields').append(s)}
-let nameLabel=document.createElement('label');nameLabel.textContent='Rename your character';$('fields').insertBefore(nameLabel,$('fields').children[2]);let nameInput=document.createElement('input');nameInput.id='f_name';nameInput.maxLength=32;nameInput.value=state.name;nameInput.oninput=()=>state.name=nameInput.value;$('fields').insertBefore(nameInput,$('fields').children[3]);
+// Visual choices: tapping a swatch or tile updates the visible avatar immediately.
+let nameLabel=document.createElement('label');nameLabel.textContent='Character name';$('fields').append(nameLabel);
+let nameInput=document.createElement('input');nameInput.id='f_name';nameInput.maxLength=32;nameInput.value=state.name;nameInput.oninput=()=>state.name=nameInput.value;$('fields').append(nameInput);
+const choiceButtons={};
+for(const key of Object.keys(choices)){
+ const l=document.createElement('label');l.textContent=labels[key];$('fields').append(l);
+ const grid=document.createElement('div');grid.className='choice-grid';grid.setAttribute('role','group');grid.setAttribute('aria-label',labels[key]);
+ choiceButtons[key]=[];
+ choices[key].forEach((v,i)=>{
+  const b=document.createElement('button');b.type='button';b.className='choice'+(v.startsWith('#')?' swatch':'');
+  if(v.startsWith('#')){b.style.backgroundColor=v;b.title=labels[key]+' '+(i+1);b.setAttribute('aria-label',b.title)}
+  else b.textContent=v;
+  b.onclick=()=>{state[key]=i;if(key==='template'){state.name=choices.template[i];nameInput.value=state.name}refresh();updateButtons()};
+  choiceButtons[key].push(b);grid.append(b);
+ });$('fields').append(grid);
+}
+function updateButtons(){for(const key of Object.keys(choiceButtons))choiceButtons[key].forEach((b,i)=>{b.classList.toggle('selected',state[key]===i);b.setAttribute('aria-pressed',String(state[key]===i))})}
+updateButtons();
 let hLabel=document.createElement('label');hLabel.textContent='Height';$('fields').append(hLabel);let slider=document.createElement('input');slider.type='range';slider.min='.8';slider.max='1.2';slider.step='.05';slider.value='1';slider.oninput=()=>{state.height=+slider.value;refresh()};$('fields').append(slider);
 function recolor(mesh,color){mesh.material.color.set(color)}
-function refresh(){if(animatedModel){animatedModel.traverse(o=>{if(o.isMesh&&o.material){const n=o.name.toLowerCase();if(n.includes('body')||n.includes('shirt')||n.includes('torso')){o.material=o.material.clone();o.material.color.set(choices.outfit[state.outfit])}}});animatedModel.scale.setScalar(state.height)}recolor(head,choices.skin[state.skin]);ears.forEach(e=>{recolor(e,choices.skin[state.skin]);e.scale.x=[.4,.6,.85][state.ears]});recolor(hair,choices.hairColor[state.hairColor]);hair.visible=!modelLoaded&&state.hairStyle!==4;hair.scale.y=[.48,.75,1.12,1.4,0][state.hairStyle];hair.position.y=state.hairStyle===3?2.49:2.62;head.scale.x=[.84,1,1.18][state.face];eyes.forEach(e=>recolor(e,choices.eyes[state.eyes]));body.scale.x=[.75,1,1.28][state.build];[body,...arms].forEach(m=>recolor(m,choices.outfit[state.outfit]));avatar.scale.y=state.height}refresh();
+function refresh(){if(animatedModel){animatedModel.visible=playing;if(playing){animatedModel.traverse(o=>{if(o.isMesh&&o.material){const n=o.name.toLowerCase();if(n.includes('body')||n.includes('shirt')||n.includes('torso')){o.material=o.material.clone();o.material.color.set(choices.outfit[state.outfit])}}});animatedModel.scale.setScalar(state.height)}}recolor(head,choices.skin[state.skin]);ears.forEach(e=>{recolor(e,choices.skin[state.skin]);e.scale.x=[.4,.6,.85][state.ears]});recolor(hair,choices.hairColor[state.hairColor]);hair.visible=state.hairStyle!==4;hair.scale.y=[.48,.75,1.12,1.4,0][state.hairStyle];hair.position.y=state.hairStyle===3?2.49:2.62;head.scale.x=[.84,1,1.18][state.face];eyes.forEach(e=>recolor(e,choices.eyes[state.eyes]));body.scale.x=[.75,1,1.28][state.build];[body,...arms].forEach(m=>recolor(m,choices.outfit[state.outfit]));avatar.scale.y=state.height}refresh();
 // Load an actual skinned, animated human model. The geometric avatar remains only
 // as an offline fallback if the external model cannot be downloaded.
 const loader=new GLTFLoader();
@@ -43,21 +59,21 @@ loader.load('https://threejs.org/examples/models/gltf/Soldier.glb',gltf=>{
   animatedModel.scale.setScalar(1.0);
   animatedModel.position.y=0;
   animatedModel.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
-  avatar.add(animatedModel);
-  for(const p of [...legs,body,...arms,head,...ears,...eyes,hair])p.visible=false;
+  avatar.add(animatedModel);animatedModel.visible=false;
+  // The customisable avatar stays visible in the studio; animated model is used in play mode.
   // Hide the extra procedural facial features too.
-  avatar.children.forEach(child=>{if(child!==animatedModel&&child.isMesh)child.visible=false});
+  // Keep editable meshes for the character studio.
   mixer=new THREE.AnimationMixer(animatedModel);
   const idle=gltf.animations.find(a=>/idle/i.test(a.name));
   const walk=gltf.animations.find(a=>/walk/i.test(a.name));
   if(idle){idleAction=mixer.clipAction(idle);idleAction.play()}
   if(walk){walkAction=mixer.clipAction(walk);walkAction.play();walkAction.setEffectiveWeight(0)}
   modelLoaded=true;
-  $('status').textContent='Animated 3D character loaded. Appearance controls are being upgraded for this model.';
+  $('status').textContent='Animated 3D character loaded. Tap a color or style to preview changes live; the animated play model is separate.';
 },undefined,error=>{$('status').textContent='3D character asset could not load. Showing temporary offline fallback.';console.warn(error)});
 let playing=false,drag=false,previousX=0,turn=0;canvas.addEventListener('pointerdown',e=>{drag=true;previousX=e.clientX});window.addEventListener('pointerup',()=>drag=false);canvas.addEventListener('pointermove',e=>{if(!drag||playing)return;turn+=(e.clientX-previousX)*.01;previousX=e.clientX;avatar.rotation.y=turn});
-$('start').onclick=()=>{playing=true;document.body.classList.add('playing');$('status').textContent='Welcome, '+(state.name.trim()||'Player')+'! Explore your first neighborhood. Use the arrows to move.';avatar.position.set(0,0,0)};
-$('back').onclick=()=>{playing=false;document.body.classList.remove('playing');avatar.position.set(0,0,0)};
+$('start').onclick=()=>{playing=true;if(animatedModel){animatedModel.visible=true;avatar.children.forEach(c=>{if(c!==animatedModel)c.visible=false})}document.body.classList.add('playing');$('status').textContent='Welcome, '+(state.name.trim()||'Player')+'! Explore your first neighborhood. Use the arrows to move.';avatar.position.set(0,0,0)};
+$('back').onclick=()=>{playing=false;if(animatedModel)animatedModel.visible=false;avatar.children.forEach(c=>{if(c!==animatedModel)c.visible=true});refresh();document.body.classList.remove('playing');avatar.position.set(0,0,0)};
 const movement={left:false,right:false,forward:false};for(const k of Object.keys(movement)){const el=$(k);el.addEventListener('pointerdown',e=>{e.preventDefault();movement[k]=true;el.setPointerCapture(e.pointerId)});for(const ev of ['pointerup','pointercancel','lostpointercapture'])el.addEventListener(ev,()=>movement[k]=false)}
 window.addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='w')movement.forward=true;if(e.key==='ArrowLeft'||e.key==='a')movement.left=true;if(e.key==='ArrowRight'||e.key==='d')movement.right=true});window.addEventListener('keyup',e=>{if(e.key==='ArrowUp'||e.key==='w')movement.forward=false;if(e.key==='ArrowLeft'||e.key==='a')movement.left=false;if(e.key==='ArrowRight'||e.key==='d')movement.right=false});
 let last=performance.now();function animate(now){requestAnimationFrame(animate);let dt=Math.min((now-last)/1000,.05);last=now;if(mixer)mixer.update(dt);if(walkAction&&idleAction){const moving=playing&&movement.forward;walkAction.setEffectiveWeight(moving?1:0);idleAction.setEffectiveWeight(moving?0:1)}if(playing){if(movement.left)avatar.rotation.y+=dt*2.4;if(movement.right)avatar.rotation.y-=dt*2.4;if(movement.forward){avatar.position.x-=Math.sin(avatar.rotation.y)*dt*4;avatar.position.z-=Math.cos(avatar.rotation.y)*dt*4}camera.position.lerp(new THREE.Vector3(avatar.position.x+4,avatar.position.y+4.4,avatar.position.z+8),.09);camera.lookAt(avatar.position.x,1.5,avatar.position.z)}renderer.render(scene,camera)}requestAnimationFrame(animate);
