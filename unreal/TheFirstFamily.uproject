@@ -3,7 +3,13 @@
   "EngineAssociation": "5.5",
   "Category": "Games",
   "Description": "The First Family: Build Your Empire — third-person life and business simulation",
-  "Modules": [],
+  "Modules": [
+    {
+      "Name": "TheFirstFamily",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ],
   "Plugins": [
     {
       "Name": "ModelingToolsEditorMode",
