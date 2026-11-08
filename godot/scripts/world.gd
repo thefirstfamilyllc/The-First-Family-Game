@@ -1,6 +1,10 @@
 extends Node3D
 
 const PlayerScript = preload("res://scripts/player.gd")
+const ConsequenceScript = preload("res://scripts/consequence_engine.gd")
+var consequences = ConsequenceScript.new()
+var adult_mode := false
+var context_panel: PanelContainer
 var player: FamilyPlayer
 var camera: Camera3D
 var hud: CanvasLayer
@@ -70,6 +74,10 @@ func _build_environment() -> void:
     _make_action("Pickup order", Vector3(-8, 0.25, 6), Color("#ffcb60"))
     _make_action("Rest at home", Vector3(12, 0.25, -7), Color("#79d9ff"))
     _make_action("Family time", Vector3(7, 0.25, -4), Color("#ff9fc8"))
+    _make_building(Vector3(-23, 0, 12), Vector3(9, 4, 8), Color("#f3c978"), "Store")
+    _make_action("Visit store", Vector3(-23, 0.25, 17), Color("#f8d655"))
+    _make_building(Vector3(24, 0, 13), Vector3(12, 4, 9), Color("#b2d3e8"), "Airport")
+    _make_action("Visit airport", Vector3(24, 0.25, 19), Color("#7bd8ff"))
 
 func _make_building(pos: Vector3, size: Vector3, wall: Color, kind: String) -> void:
     _make_box(self, size, pos + Vector3(0, size.y / 2.0, 0), wall)
@@ -160,6 +168,9 @@ func _choose_character(character_name: String) -> void:
     player.position = Vector3(0, 1.1, 9)
     add_child(player)
     camera = player.camera_pivot.get_child(0) as Camera3D
+    # Account permissions are currently a development-only selection. A production
+    # release must use verified age/parental permissions, never a self-asserted toggle.
+    adult_mode = character_name == "Jay"
     status_label.text = "Playing as %s. Tap ground to walk; tap glowing circles to act." % character_name
     _update_stats()
 
@@ -198,6 +209,12 @@ func _process(_delta: float) -> void:
 
 func _complete_action(action: String) -> void:
     var outcome := randf()
+    if action == "Visit store":
+        _open_context("store")
+        return
+    elif action == "Visit airport":
+        _open_context("airport")
+        return
     if action == "Wash laundry":
         if outcome < 0.22:
             cash -= 12
@@ -229,4 +246,29 @@ func _complete_action(action: String) -> void:
     _update_stats()
 
 func _update_stats() -> void:
-    stats_label.text = "Empire Cash: $%d  |  Reputation: %d  |  Orders: %d" % [cash, reputation, orders]
+    stats_label.text = "Empire Cash: $%d | Reputation: %d | Orders: %d | Heat: %d" % [cash + int(consequences.world_state["cash"]) - 250, reputation + int(consequences.world_state["reputation"]) - 50, orders, int(consequences.world_state["heat"])]
+
+func _open_context(context: String) -> void:
+    if context_panel != null and is_instance_valid(context_panel):
+        context_panel.queue_free()
+    context_panel = PanelContainer.new()
+    context_panel.position = Vector2(20, 115)
+    context_panel.custom_minimum_size = Vector2(310, 0)
+    hud.add_child(context_panel)
+    var column := VBoxContainer.new()
+    context_panel.add_child(column)
+    var title := Label.new()
+    title.text = "STORE" if context == "store" else "AIRPORT"
+    column.add_child(title)
+    for action in consequences.allowed_actions(context, adult_mode):
+        var button := Button.new()
+        button.text = action
+        button.pressed.connect(_select_context_action.bind(action))
+        column.add_child(button)
+
+func _select_context_action(action: String) -> void:
+    var result: Dictionary = consequences.resolve(action, adult_mode)
+    status_label.text = str(result.get("message", ""))
+    if context_panel != null and is_instance_valid(context_panel):
+        context_panel.queue_free()
+    _update_stats()
