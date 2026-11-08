@@ -22,6 +22,7 @@ const EYE_COLORS := ["#5c3824", "#3d765c", "#507ab0", "#888888", "#241e1a"]
 const OUTFIT_COLORS := ["#713fa7", "#2e343d", "#89bb4b", "#d94e76", "#e5a43e"]
 var preview: SubViewport
 var preview_body: MeshInstance3D
+var preview_head: MeshInstance3D
 var preview_hair: MeshInstance3D
 var preview_eyes: Array[MeshInstance3D] = []
 var fields: Dictionary = {}
@@ -140,7 +141,7 @@ func _build_preview() -> void:
     ambient.environment = env
     root.add_child(ambient)
     preview_body = _sphere(root, Vector3(0, 0.9, 0), Vector3(0.55, 0.85, 0.3))
-    _sphere(root, Vector3(0, 1.72, 0), Vector3(0.32, 0.39, 0.32))
+    preview_head = _sphere(root, Vector3(0, 1.72, 0), Vector3(0.32, 0.39, 0.32))
     preview_hair = _sphere(root, Vector3(0, 2.01, 0), Vector3(0.34, 0.16, 0.34))
     for x in [-0.12, 0.12]:
         preview_eyes.append(_sphere(root, Vector3(x, 1.76, 0.303), Vector3(0.045, 0.05, 0.018)))
@@ -162,6 +163,8 @@ func _refresh_preview() -> void:
     if preview_body == null:
         return
     _color(preview_body, Color(OUTFIT_COLORS[int(profile["outfit"])]))
+    _color(preview_head, Color(SKIN_COLORS[int(profile["skin"])]))
+    preview_head.scale.x = [0.28, 0.32, 0.37][int(profile["face_shape"])]
     _color(preview_hair, Color(HAIR_COLORS[int(profile["hair_color"])]))
     for eye in preview_eyes:
         _color(eye, Color(EYE_COLORS[int(profile["eye_color"])]))
