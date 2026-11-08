@@ -42,6 +42,7 @@ bool UTFFGameInstance::SaveProgress()
     if (!Save) return false;
     Save->Level = Level; Save->Cash = Cash; Save->Character = SelectedCharacter;
     Save->bAccepted = bCharacterAccepted; Save->Appearance = Appearance;
+    Save->bCleaningBrandUpgraded = bCleaningBrandUpgraded;
     return UGameplayStatics::SaveGameToSlot(Save, TEXT("TFF_Main"), 0);
 }
 bool UTFFGameInstance::LoadProgress()
@@ -50,5 +51,6 @@ bool UTFFGameInstance::LoadProgress()
     if (!Save) return false;
     Level = Save->Level; Cash = Save->Cash; SelectedCharacter = Save->Character;
     bCharacterAccepted = Save->bAccepted; Appearance = Save->Appearance;
+    bCleaningBrandUpgraded = Save->bCleaningBrandUpgraded && Level >= 5;
     return true;
 }
