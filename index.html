@@ -86,6 +86,25 @@
 .selection-stage .turn-tip{display:none!important}
 .stage-rotate{bottom:2%!important}
 .stage-rotate span{font-size:11px}
+</style><style id="professional-character-framing">
+/* Character selection: cinematic backdrop, consistent hero framing, no repeated art */
+.selection-layout{background:linear-gradient(100deg,#10091bdc,#180d26a8),var(--approved-art) center center/cover no-repeat!important}
+.selection-layout:before{display:none!important}
+.selection-stage{background:linear-gradient(180deg,#130b2088,#170d28c9)!important;box-shadow:inset 0 0 32px #09050caa,0 12px 32px #0006!important;border:1px solid #a76ee655!important;isolation:isolate}
+.selection-stage:before{z-index:7!important;left:19%!important;right:19%!important;bottom:12%!important;height:5%!important;border-width:3px!important}
+#approvedCharacterPortrait{inset:0 0 17%!important;background-size:auto 100%!important;background-position:50% center!important;mask-image:linear-gradient(90deg,transparent 0%,black 15%,black 85%,transparent 100%)!important;-webkit-mask-image:linear-gradient(90deg,transparent 0%,black 15%,black 85%,transparent 100%)!important}
+#approvedCharacterPortrait[data-name="Jay"]{background-position:50% center!important}
+#approvedCharacterPortrait[data-name="Esined"]{background-position:27% center!important}
+#approvedCharacterPortrait[data-name="Jahdē"]{background-position:97% center!important}
+.stage-rotate{bottom:1%!important;width:95%;justify-content:center;gap:8px!important;white-space:nowrap}
+.stage-rotate button{min-width:40px!important;padding:5px 10px!important}
+.stage-rotate span{font-size:10px!important;letter-spacing:.04em}
+@media(max-width:650px) and (orientation:portrait){
+.selection-stage{top:19%!important;height:59%!important;left:37%!important;width:61%!important}
+#approvedCharacterPortrait{background-size:auto 100%!important}
+.selection-stage:before{bottom:14%!important}
+.stage-rotate{bottom:1%!important}
+}
 </style></head><body>
 <section id="start" class="screen"><div class="menu"><button id="new" aria-label="New Game">NEW GAME</button><button id="load" aria-label="Load Game">LOAD GAME</button><button id="settings" aria-label="Settings">SETTINGS</button><button id="credits" aria-label="Credits">CREDITS</button><button id="exit" aria-label="Exit">EXIT</button><button id="store" aria-label="Game Store">GAME STORE</button></div><div class="fallback">NEW GAME → CHARACTER SELECTION → LAUNDRY BUSINESS</div></section>
 
