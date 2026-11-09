@@ -236,7 +236,22 @@ const box=(w,h,d,x,y,z,mat,parent=creatorWorld)=>add(new t.BoxGeometry(w,h,d),ma
 const cylinder=(a,b,h,x,y,z,mat,parent=creatorWorld)=>add(new t.CylinderGeometry(a,b,h,48),mat,x,y,z,parent);
 const neon=(w,h,d,x,y,z,color,parent=creatorWorld)=>box(w,h,d,x,y,z,new t.MeshBasicMaterial({color}),parent);
 const glassLit=new t.MeshStandardMaterial({color:0x8e56b4,metalness:.45,roughness:.12,emissive:0x7a2c8c,emissiveIntensity:.38,transparent:true,opacity:.76});
-const pavement=box(42,.16,38,0,-.22,-8,street);
+// Physically based wet asphalt: procedural color, roughness and bump maps, not a flat colored slab.
+function asphaltMaps(){
+ const c=document.createElement('canvas');c.width=c.height=1024;const a=c.getContext('2d');
+ const rough=document.createElement('canvas');rough.width=rough.height=1024;const b=rough.getContext('2d');
+ const im=a.createImageData(1024,1024),rm=b.createImageData(1024,1024);
+ let seed=17311;const rnd=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
+ for(let i=0;i<1024*1024;i++){const grain=rnd(),puddle=rnd(),v=Math.round(22+grain*31);const j=i*4;im.data[j]=v;im.data[j+1]=Math.round(v*.91);im.data[j+2]=Math.round(v*1.27);im.data[j+3]=255;const q=Math.round(puddle>.78?35:110+grain*110);rm.data[j]=rm.data[j+1]=rm.data[j+2]=q;rm.data[j+3]=255;}
+ a.putImageData(im,0,0);b.putImageData(rm,0,0);
+ const color=new t.CanvasTexture(c),rmap=new t.CanvasTexture(rough);
+ for(const tx of [color,rmap]){tx.wrapS=tx.wrapT=t.RepeatWrapping;tx.repeat.set(5,5);tx.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy())}
+ color.colorSpace=t.SRGBColorSpace;
+ return {color,rmap};
+}
+const asphalt=asphaltMaps();
+const wetRoad=new t.MeshPhysicalMaterial({map:asphalt.color,roughnessMap:asphalt.rmap,roughness:.5,metalness:.23,clearcoat:.95,clearcoatRoughness:.14,envMapIntensity:1.1});
+const pavement=box(42,.16,38,0,-.22,-8,wetRoad);
 for(let z=-24;z<10;z+=2.5){box(42,.008,.018,0,-.127,z,surf(0x5e4b6d,.25,.4));}
 for(let x=-20;x<=20;x+=2.5){box(.018,.008,38,x,-.127,-8,surf(0x5e4b6d,.25,.4));}
 for(let i=0;i<12;i++){const x=(i%4-1.5)*8,z=-19+Math.floor(i/4)*10;const reflection=add(new t.PlaneGeometry(3.6,5.8),new t.MeshBasicMaterial({color:i%2?0xb44aff:0xffc45e,transparent:true,opacity:.13,depthWrite:false,side:t.DoubleSide}),x,-.115,z);reflection.rotation.x=-Math.PI/2;}
@@ -258,6 +273,17 @@ box(18.8,1.25,.3,0,6.35,1.57,violet,shop);
 const signCanvas=document.createElement('canvas');signCanvas.width=2048;signCanvas.height=320;const ctx=signCanvas.getContext('2d');ctx.fillStyle='#3b204e';ctx.fillRect(0,0,2048,320);ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='#e6a1ff';ctx.shadowBlur=24;ctx.fillStyle='#ffd78c';ctx.font='italic bold 158px Georgia';ctx.fillText('The First Family',1024,145);ctx.shadowBlur=0;ctx.fillStyle='#e2d1ef';ctx.font='bold 54px Arial';ctx.fillText('PICK-UP & DELIVERY  •  LAUNDRY SERVICE',1024,258);
 const sign=add(new t.PlaneGeometry(15.8,2.5),new t.MeshBasicMaterial({map:new t.CanvasTexture(signCanvas),side:t.DoubleSide}),0,6.32,1.77,shop);
 for(const x of [-9.3,9.3]){box(.15,7.2,.2,x,3.7,1.7,gold,shop);const lamp=new t.PointLight(0xef9fff,16,11);lamp.position.set(x,5,3.2);shop.add(lamp)}
+// Recessed door, dimensional architectural trim, illuminated canopy and storefront depth.
+const doorway=box(2.6,4.6,.18,0,2.55,1.83,surf(0x101724,.5,.15),shop);
+for(const x of [-1.38,1.38])box(.12,4.75,.27,x,2.55,1.98,gold,shop);
+box(2.8,.16,.3,0,4.94,2.02,gold,shop);
+const handle=cylinder(.045,.045,.6,.84,2.15,2.03,gold,shop);handle.rotation.z=Math.PI/2;
+const canopy=box(18.5,.22,1.8,0,5.02,2.6,surf(0x251833,.5,.25),shop);
+for(let x=-8.5;x<=8.5;x+=1.7)neon(1.15,.04,.13,x,4.88,3.42,0xffc980,shop);
+for(let x=-7.7;x<=7.7;x+=3.85){const wallLight=new t.PointLight(0xffd3a0,4.5,5);wallLight.position.set(x,4.5,3);shop.add(wallLight)}
+// A three-dimensional night sky uses volumetric fog for depth, without replacing the world with a photo.
+world.fog=new t.FogExp2(0x120b24,.012);
+renderer.toneMapping=t.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;
 // Street perspective and high-rise skyline, with windows and rounded lamp fixtures.
 for(let i=0;i<18;i++){const x=(i%9-4)*4.7;const z=-37-Math.floor(i/9)*5;const h=9+(i*7%12);box(3.6,h,3.5,x,h/2,z,surf(i%3===0?0x352a56:0x262742,.1,.72));for(let row=2;row<h-1;row+=1.6)for(let col of [-.9,.3])if((i+row+col)%3>0.7)neon(.48,.55,.02,x+col,row,z+1.78,0xe9ad70);}
 for(const x of [-10.5,10.5])for(const z of [-10,-2,6]){cylinder(.12,.15,3.8,x,1.8,z,surf(0x342b45,.5,.3));const bulb=add(new t.SphereGeometry(.32,24,16),new t.MeshBasicMaterial({color:0xffcb8b}),x,3.85,z);const lamp=new t.PointLight(0xffa65c,8,9);lamp.position.set(x,3.8,z);creatorWorld.add(lamp);}
