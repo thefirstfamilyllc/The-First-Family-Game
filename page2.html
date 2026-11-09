@@ -166,6 +166,28 @@
 #customDialog .avatarStage .zoomControls{z-index:4}
 </style>
 <style id="tff-true-3d-scene">#customDialog .avatarStage{background:linear-gradient(#2a3572,#8a539c 65%,#443961)!important}#customDialog .stageArt{display:none!important}</style>
+<style id="tff-fullscreen-3d-studio">
+#customDialog{padding:0!important;background:#10102b!important;overflow:hidden!important}
+#customDialog .customPanel{position:relative!important;width:100vw!important;max-width:none!important;height:100dvh!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;backdrop-filter:none!important;overflow:hidden!important;display:block!important}
+#customDialog .customBody{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important}
+#customDialog .avatarStage{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;border-radius:0!important;background:linear-gradient(180deg,#182a63,#7650a3 60%,#262b58)!important}
+#customDialog .avatarStage #tffCustomize3D{position:absolute!important;inset:0!important;width:100%!important;height:100%!important}
+#customDialog .customNav{position:absolute!important;top:max(8px,env(safe-area-inset-top))!important;left:8px!important;right:8px!important;z-index:40!important;display:grid!important;grid-template-columns:1fr 1.2fr 1fr!important;gap:5px!important;background:#241347d9!important;border:1px solid #a8d84b!important;border-radius:12px!important;padding:5px!important}
+#customDialog .customControls{position:absolute!important;right:clamp(7px,2vw,20px)!important;top:clamp(65px,12dvh,105px)!important;bottom:clamp(10px,3dvh,28px)!important;width:clamp(205px,34vw,360px)!important;z-index:30!important;display:flex!important;flex-direction:column!important;justify-content:space-between!important;gap:4px!important;padding:8px!important;border-radius:14px!important;border:1px solid #b7f35b!important;background:linear-gradient(145deg,#271653ec,#3a2469eb)!important;box-shadow:0 10px 35px #09052099!important;overflow:hidden!important}
+#customDialog .customControls .creatorPane{min-height:0!important;overflow:hidden!important}
+#customDialog .customControls p{font-size:12px!important}
+#customDialog .zoomControls{left:clamp(8px,16vw,190px)!important;bottom:max(12px,env(safe-area-inset-bottom))!important;transform:translateX(-30%)!important}
+#customDialog .creatorActions{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+@media(max-width:620px) and (orientation:portrait){
+#customDialog .customControls{width:47vw!important;min-width:0!important;right:5px!important;top:calc(env(safe-area-inset-top) + 65px)!important;bottom:calc(env(safe-area-inset-bottom) + 10px)!important;padding:5px!important}
+#customDialog .zoomControls{left:24%!important;transform:translateX(-50%)!important;bottom:calc(env(safe-area-inset-bottom) + 12px)!important}
+#customDialog .zoomControls button{font-size:10px!important;padding:5px!important}
+#customDialog .customControls button{font-size:10px!important;padding:4px 2px!important}
+#customDialog .customNav h2{font-size:12px!important}
+#customDialog .customNav button{font-size:9px!important}
+#customDialog .paintGuide,#customDialog #customHint{display:none!important}
+}
+</style>
 <script type="module" id="tff-glb-loader">
 const host=document.querySelector('.scene'),view=document.createElement('div'),label=document.createElement('div');
 view.id='tffModelViewport';label.id='tff3dStatus';const backdrop=document.createElement('canvas');backdrop.id='esinedCleanBackdrop';host.append(backdrop,view,label);
