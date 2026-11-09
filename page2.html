@@ -224,39 +224,61 @@ try{
 const t=await import('https://esm.sh/three@0.160.1');
 const {GLTFLoader}=await import('https://esm.sh/three@0.160.1/examples/jsm/loaders/GLTFLoader.js');
 THREE={...t,GLTFLoader};renderer=new t.WebGLRenderer({alpha:true,antialias:true});renderer.setClearColor(0,0);renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));view.appendChild(renderer.domElement);
-world=new t.Scene();camera=new t.PerspectiveCamera(36,1,.1,100);camera.position.set(0,1.7,7.5);camera.lookAt(0,1.7,0);let zoomDistance=7.5;function setZoom(d){zoomDistance=Math.max(2.1,Math.min(12,d));camera.position.z=zoomDistance;camera.lookAt(0,inCustomize?1.6:1.7,inCustomize?-1.4:0)}document.getElementById('zoomIn').onclick=()=>setZoom(zoomDistance-.65);document.getElementById('zoomOut').onclick=()=>setZoom(zoomDistance+.65);document.getElementById('zoomReset').onclick=()=>setZoom(7.5);
+world=new t.Scene();camera=new t.PerspectiveCamera(36,1,.1,100);camera.position.set(0,1.7,7.5);camera.lookAt(0,1.7,0);let zoomDistance=7.5;function setZoom(d){zoomDistance=Math.max(2.1,Math.min(12,d));camera.position.z=zoomDistance;camera.lookAt(0,inCustomize?1.6:1.7,inCustomize?-3.2:0)}document.getElementById('zoomIn').onclick=()=>setZoom(zoomDistance-.65);document.getElementById('zoomOut').onclick=()=>setZoom(zoomDistance+.65);document.getElementById('zoomReset').onclick=()=>setZoom(7.5);
 world.add(new t.HemisphereLight(0xffffff,0x44334c,2.5));const light=new t.DirectionalLight(0xffdfbb,3);light.position.set(-4,8,5);world.add(light);
 
-// Standalone 3D customization studio built from new geometry, not the selection artwork.
+// A new outdoor 3D character plaza, styled to match the colorful family game.
 const creatorWorld=new t.Group();creatorWorld.visible=false;world.add(creatorWorld);
-const mat=(c,metal=0,rough=.65)=>new t.MeshStandardMaterial({color:c,metalness:metal,roughness:rough});
-const shell=mat(0x241c3c),floor=mat(0x38344f,.3,.32),trim=mat(0xa7dc4b,.35,.28),gold=mat(0xeec56e,.45,.3),wall=mat(0x483268);
-function cube(w,h,d,x,y,z,m,parent=creatorWorld){const o=new t.Mesh(new t.BoxGeometry(w,h,d),m);o.position.set(x,y,z);parent.add(o);return o}
-cube(18,.18,18,0,-.19,-3,floor);
-cube(18,8,.3,0,3.8,-11.7,wall);
-cube(.3,8,18,-8.8,3.8,-3,shell);
-cube(.3,8,18,8.8,3.8,-3,shell);
-cube(18,.22,18,0,7.6,-3,shell);
-for(let z=-10;z<=4;z+=2){cube(17,.025,.045,0,-.075,z,mat(0x67628a,.1));}
-for(let x=-8;x<=8;x+=2){cube(.045,.025,17,x,-.07,-3,mat(0x67628a,.1));}
-for(let x of [-8.5,8.5])for(let z of [-9,-4,1])cube(.14,6.8,.15,x,3.35,z,trim);
-for(let x of [-5,0,5]){cube(2.8,.12,.7,x,7.1,-4.5,gold);const l=new t.PointLight(0xb3d8ff,12,13);l.position.set(x,6.7,-4.5);creatorWorld.add(l);}
-const platform=new t.Mesh(new t.CylinderGeometry(1.7,1.9,.28,64),mat(0x5a3e92,.35,.28));platform.position.set(0,-.04,0);creatorWorld.add(platform);
-const edge=new t.Mesh(new t.TorusGeometry(1.72,.06,10,80),new t.MeshBasicMaterial({color:0xc7ff58}));edge.rotation.x=Math.PI/2;edge.position.y=.11;creatorWorld.add(edge);
-const mirrorMat=new t.MeshPhysicalMaterial({color:0x9bd8f2,metalness:.7,roughness:.08,transparent:true,opacity:.75});
-for(let x of [-5.8,5.8]){cube(2.7,4.8,.12,x,3.05,-10.9,mirrorMat);cube(2.9,.12,.2,x,5.5,-10.8,gold);cube(2.9,.12,.2,x,.6,-10.8,gold);cube(.12,4.9,.2,x-1.43,3.05,-10.8,gold);cube(.12,4.9,.2,x+1.43,3.05,-10.8,gold)}
-const banner=document.createElement('canvas');banner.width=1024;banner.height=180;const bc=banner.getContext('2d');bc.fillStyle='#27173f';bc.fillRect(0,0,1024,180);bc.fillStyle='#d8ff6c';bc.textAlign='center';bc.textBaseline='middle';bc.font='bold 74px Arial';bc.fillText('THE FIRST FAMILY',512,92);const bannerMesh=new t.Mesh(new t.PlaneGeometry(6.5,1.15),new t.MeshBasicMaterial({map:new t.CanvasTexture(banner),side:t.DoubleSide}));bannerMesh.position.set(0,5.8,-11.5);creatorWorld.add(bannerMesh);
-const studioStations=new t.Group();creatorWorld.add(studioStations);const studioTargets=[];
-const studioNames=[['appearance','LOOK'],['face','FACE'],['body','BODY'],['clothes','STYLE']];
-function labelTexture(label){const c=document.createElement('canvas');c.width=384;c.height=192;const ctx=c.getContext('2d');ctx.fillStyle='#21153e';ctx.fillRect(0,0,384,192);ctx.strokeStyle='#caff63';ctx.lineWidth=12;ctx.strokeRect(8,8,368,176);ctx.fillStyle='#f8db83';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 72px Arial';ctx.fillText(label,192,96);return new t.CanvasTexture(c)}
-studioNames.forEach(([id,label],i)=>{const g=new t.Group();g.position.set(-5.7+i*3.8,.2,-5.5);cube(2,.18,1.1,0,0,0,mat(0x62548d,.3),g);cube(.12,.9,.12,0,.5,0,gold,g);const screen=new t.Mesh(new t.PlaneGeometry(2.2,1.05),new t.MeshBasicMaterial({map:labelTexture(label),side:t.DoubleSide}));screen.position.set(0,1.15,.18);screen.userData.station=id;g.add(screen);g.userData.station=id;studioStations.add(g);studioTargets.push(screen)});
+const m=(color,metalness=0,roughness=.72)=>new t.MeshStandardMaterial({color,metalness,roughness});
+const lime=m(0xa7e94b,.18),purple=m(0x653c99),gold=m(0xf5c96b,.32),pavement=m(0x817e94),leaf=m(0x4cb867),dark=m(0x30274e);
+function obj(geo,mat,x,y,z,parent=creatorWorld){const o=new t.Mesh(geo,mat);o.position.set(x,y,z);parent.add(o);return o}
+function slab(w,h,d,x,y,z,mat,parent=creatorWorld){return obj(new t.BoxGeometry(w,h,d),mat,x,y,z,parent)}
+function cyl(rt,rb,h,x,y,z,mat,segments=48,parent=creatorWorld){return obj(new t.CylinderGeometry(rt,rb,h,segments),mat,x,y,z,parent)}
+// Perspective pavement, curved paths, raised illuminated character platform.
+slab(28,.18,30,0,-.23,-6,pavement);
+const walkway=obj(new t.PlaneGeometry(6,22),m(0xb9b3bd),0,-.125,-6);walkway.rotation.x=-Math.PI/2;
+for(let z=-15;z<4;z+=2.6)slab(6,.025,.055,0,-.10,z,m(0xf5dfae));
+cyl(1.85,2.05,.26,0,-.05,0,purple,80);
+const platformRing=obj(new t.TorusGeometry(1.86,.065,12,96),new t.MeshBasicMaterial({color:0xc5ff65}),0,.085,0);platformRing.rotation.x=Math.PI/2;
+// Architectural storefront with curved canopy and real depth behind the avatar.
+const building=new t.Group();building.position.set(0,0,-13);creatorWorld.add(building);
+slab(13,6,3.4,0,3,-.6,m(0x7151a4),building);
+for(const x of [-4.15,0,4.15]){
+ slab(3.6,3.5,.12,x,2.1,1.18,m(0x3b9cc2,.35,.18),building);
+ slab(3.76,.12,.2,x,3.9,1.27,gold,building);
+ slab(3.76,.12,.2,x,.33,1.27,gold,building);
+ for(const dx of [-1.83,1.83])slab(.12,3.5,.2,x+dx,2.1,1.27,gold,building);
+}
+slab(14,.3,4.1,0,6.2,-.1,lime,building);
+const awning=cyl(7,7,.65,0,5.5,1.5,lime,64,building);awning.rotation.z=Math.PI/2;awning.scale.set(1,.095,.18);
+const signCanvas=document.createElement('canvas');signCanvas.width=1024;signCanvas.height=200;const ctx=signCanvas.getContext('2d');ctx.fillStyle='#35224e';ctx.fillRect(0,0,1024,200);ctx.fillStyle='#f7d67a';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 74px Arial';ctx.fillText('THE FIRST FAMILY',512,98);
+const sign=obj(new t.PlaneGeometry(9.6,1.5),new t.MeshBasicMaterial({map:new t.CanvasTexture(signCanvas),side:t.DoubleSide}),0,5.2,1.19,building);
+// Smooth planters, rounded foliage, bollards and lamps give the scene actual depth.
+for(const x of [-6.3,6.3])for(const z of [-8,-3,2]){
+ cyl(.6,.75,.65,x,.17,z,m(0xc1a575),40);
+ cyl(.17,.22,2.2,x,1.5,z,m(0x7b624c),20);
+ for(const [dx,dy,dz,r] of [[0,3.1,0,1.12],[-.55,2.7,.1,.78],[.55,2.8,-.1,.83]]){
+ const crown=obj(new t.IcosahedronGeometry(r,2),leaf,x+dx,dy,z+dz);crown.scale.y=.85;
+ }
+}
+for(const x of [-4.2,4.2])for(const z of [-7,1]){
+ cyl(.1,.13,2.6,x,1.3,z,dark,24);
+ const bulb=obj(new t.SphereGeometry(.26,24,16),new t.MeshBasicMaterial({color:0xffebae}),x,2.75,z);
+ const lamp=new t.PointLight(0xffe8b2,9,8);lamp.position.set(x,2.7,z);creatorWorld.add(lamp);
+}
+const sun=new t.DirectionalLight(0xffd8a5,2.2);sun.position.set(-5,10,8);creatorWorld.add(sun);
+// Interactive, rounded 3D station kiosks, placed beside the character path.
+const studioStations=new t.Group();creatorWorld.add(studioStations);
+const studioTargets=[];const studioNames=[['appearance','LOOK'],['face','FACE'],['body','BODY'],['clothes','STYLE']];
+function stationLabel(label){const c=document.createElement('canvas');c.width=384;c.height=192;const a=c.getContext('2d');a.fillStyle='#41265d';a.fillRect(0,0,384,192);a.strokeStyle='#b5f36c';a.lineWidth=12;a.strokeRect(8,8,368,176);a.fillStyle='#ffdc7c';a.textAlign='center';a.textBaseline='middle';a.font='bold 76px Arial';a.fillText(label,192,100);return new t.CanvasTexture(c)}
+studioNames.forEach(([id,label],i)=>{const g=new t.Group();g.position.set(-5.25+i*3.5,0,-5.2);cyl(.64,.75,.45,0,.25,0,purple,48,g);cyl(.12,.17,1.1,0,.97,0,gold,32,g);const panel=obj(new t.PlaneGeometry(1.8,.9),new t.MeshBasicMaterial({map:stationLabel(label),side:t.DoubleSide}),0,1.65,.1,g);panel.userData.station=id;studioTargets.push(panel);g.userData.station=id;studioStations.add(g)});
 const studioRay=new t.Raycaster(),studioPointer=new t.Vector2();
-function chooseStudioStation(id){document.querySelector('#creatorTabs [data-tab="'+id+'"]')?.click();studioStations.children.forEach(g=>g.scale.setScalar(g.userData.station===id?1.12:1))}
+function chooseStudioStation(id){document.querySelector('#creatorTabs [data-tab="'+id+'"]')?.click();studioStations.children.forEach(g=>g.scale.setScalar(g.userData.station===id?1.13:1))}
 function onStudioTap(event){if(!inCustomize||!creatorWorld.visible)return false;const r=renderer.domElement.getBoundingClientRect();studioPointer.set((event.clientX-r.left)/r.width*2-1,1-(event.clientY-r.top)/r.height*2);studioRay.setFromCamera(studioPointer,camera);const hit=studioRay.intersectObjects(studioTargets,false)[0];if(!hit)return false;chooseStudioStation(hit.object.userData.station);return true}
 const customize3D=document.getElementById('tffCustomize3D');let inCustomize=false;
 function resize(){const target=inCustomize?customize3D:view;const w=target.clientWidth,h=target.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
 new ResizeObserver(resize).observe(view);new ResizeObserver(resize).observe(customize3D);resize();
-window.addEventListener('tff:custom-open',()=>{inCustomize=true;creatorWorld.visible=true;camera.position.set(2.8,2.5,zoomDistance);camera.lookAt(0,1.6,-2.1);customize3D.appendChild(renderer.domElement);resize()});
+window.addEventListener('tff:custom-open',()=>{inCustomize=true;creatorWorld.visible=true;camera.position.set(2.4,2.25,zoomDistance);camera.lookAt(0,1.6,-3.2);customize3D.appendChild(renderer.domElement);resize()});
 window.addEventListener('tff:custom-close',()=>{inCustomize=false;creatorWorld.visible=false;setZoom(7.5);view.appendChild(renderer.domElement);resize()});customize3D.addEventListener('wheel',e=>{if(!inCustomize)return;e.preventDefault();setZoom(zoomDistance+Math.sign(e.deltaY)*.45)},{passive:false});
 view.addEventListener('pointerdown',e=>{if(!avatar)return;drag=true;last=e.clientX;view.setPointerCapture(e.pointerId)});
 view.addEventListener('pointermove',e=>{if(!drag||!avatar)return;avatar.rotation.y+=(e.clientX-last)*.015;last=e.clientX});
