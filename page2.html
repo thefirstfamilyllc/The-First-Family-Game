@@ -224,61 +224,56 @@ try{
 const t=await import('https://esm.sh/three@0.160.1');
 const {GLTFLoader}=await import('https://esm.sh/three@0.160.1/examples/jsm/loaders/GLTFLoader.js');
 THREE={...t,GLTFLoader};renderer=new t.WebGLRenderer({alpha:true,antialias:true});renderer.setClearColor(0,0);renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));view.appendChild(renderer.domElement);
-world=new t.Scene();camera=new t.PerspectiveCamera(36,1,.1,100);camera.position.set(0,1.7,7.5);camera.lookAt(0,1.7,0);let zoomDistance=7.5;function setZoom(d){zoomDistance=Math.max(2.1,Math.min(12,d));camera.position.z=zoomDistance;camera.lookAt(0,inCustomize?1.6:1.7,inCustomize?-3.2:0)}document.getElementById('zoomIn').onclick=()=>setZoom(zoomDistance-.65);document.getElementById('zoomOut').onclick=()=>setZoom(zoomDistance+.65);document.getElementById('zoomReset').onclick=()=>setZoom(7.5);
+world=new t.Scene();camera=new t.PerspectiveCamera(36,1,.1,100);camera.position.set(0,1.7,7.5);camera.lookAt(0,1.7,0);let zoomDistance=7.5;function setZoom(d){zoomDistance=Math.max(2.1,Math.min(12,d));camera.position.z=zoomDistance;camera.lookAt(0,inCustomize?1.7:1.7,inCustomize?-2.4:0)}document.getElementById('zoomIn').onclick=()=>setZoom(zoomDistance-.65);document.getElementById('zoomOut').onclick=()=>setZoom(zoomDistance+.65);document.getElementById('zoomReset').onclick=()=>setZoom(7.5);
 world.add(new t.HemisphereLight(0xffffff,0x44334c,2.5));const light=new t.DirectionalLight(0xffdfbb,3);light.position.set(-4,8,5);world.add(light);
 
-// A new outdoor 3D character plaza, styled to match the colorful family game.
+// Cinematic character customization courtyard. Entire environment is newly modeled 3D geometry.
 const creatorWorld=new t.Group();creatorWorld.visible=false;world.add(creatorWorld);
-const m=(color,metalness=0,roughness=.72)=>new t.MeshStandardMaterial({color,metalness,roughness});
-const lime=m(0xa7e94b,.18),purple=m(0x653c99),gold=m(0xf5c96b,.32),pavement=m(0x817e94),leaf=m(0x4cb867),dark=m(0x30274e);
-function obj(geo,mat,x,y,z,parent=creatorWorld){const o=new t.Mesh(geo,mat);o.position.set(x,y,z);parent.add(o);return o}
-function slab(w,h,d,x,y,z,mat,parent=creatorWorld){return obj(new t.BoxGeometry(w,h,d),mat,x,y,z,parent)}
-function cyl(rt,rb,h,x,y,z,mat,segments=48,parent=creatorWorld){return obj(new t.CylinderGeometry(rt,rb,h,segments),mat,x,y,z,parent)}
-// Perspective pavement, curved paths, raised illuminated character platform.
-slab(28,.18,30,0,-.23,-6,pavement);
-const walkway=obj(new t.PlaneGeometry(6,22),m(0xb9b3bd),0,-.125,-6);walkway.rotation.x=-Math.PI/2;
-for(let z=-15;z<4;z+=2.6)slab(6,.025,.055,0,-.10,z,m(0xf5dfae));
-cyl(1.85,2.05,.26,0,-.05,0,purple,80);
-const platformRing=obj(new t.TorusGeometry(1.86,.065,12,96),new t.MeshBasicMaterial({color:0xc5ff65}),0,.085,0);platformRing.rotation.x=Math.PI/2;
-// Architectural storefront with curved canopy and real depth behind the avatar.
-const building=new t.Group();building.position.set(0,0,-13);creatorWorld.add(building);
-slab(13,6,3.4,0,3,-.6,m(0x7151a4),building);
-for(const x of [-4.15,0,4.15]){
- slab(3.6,3.5,.12,x,2.1,1.18,m(0x3b9cc2,.35,.18),building);
- slab(3.76,.12,.2,x,3.9,1.27,gold,building);
- slab(3.76,.12,.2,x,.33,1.27,gold,building);
- for(const dx of [-1.83,1.83])slab(.12,3.5,.2,x+dx,2.1,1.27,gold,building);
+const surf=(c,metal=.0,rough=.5,extra={})=>new t.MeshStandardMaterial({color:c,metalness:metal,roughness:rough,...extra});
+const violet=surf(0x41245e,.25,.35),brick=surf(0x4e2e49,.12,.82),gold=surf(0xe4ac55,.6,.25),glow=new t.MeshBasicMaterial({color:0xf8bd65}),glass=surf(0x23426c,.55,.13,{transparent:true,opacity:.86}),street=surf(0x26233d,.45,.16),green=surf(0x324e3a,.25,.55);
+const add=(geo,mat,x,y,z,parent=creatorWorld)=>{const mesh=new t.Mesh(geo,mat);mesh.position.set(x,y,z);parent.add(mesh);return mesh};
+const box=(w,h,d,x,y,z,mat,parent=creatorWorld)=>add(new t.BoxGeometry(w,h,d),mat,x,y,z,parent);
+const cylinder=(a,b,h,x,y,z,mat,parent=creatorWorld)=>add(new t.CylinderGeometry(a,b,h,48),mat,x,y,z,parent);
+const neon=(w,h,d,x,y,z,color,parent=creatorWorld)=>box(w,h,d,x,y,z,new t.MeshBasicMaterial({color}),parent);
+const glassLit=new t.MeshStandardMaterial({color:0x8e56b4,metalness:.45,roughness:.12,emissive:0x7a2c8c,emissiveIntensity:.38,transparent:true,opacity:.76});
+const pavement=box(42,.16,38,0,-.22,-8,street);
+for(let z=-24;z<10;z+=2.5){box(42,.008,.018,0,-.127,z,surf(0x5e4b6d,.25,.4));}
+for(let x=-20;x<=20;x+=2.5){box(.018,.008,38,x,-.127,-8,surf(0x5e4b6d,.25,.4));}
+for(let i=0;i<12;i++){const x=(i%4-1.5)*8,z=-19+Math.floor(i/4)*10;const reflection=add(new t.PlaneGeometry(3.6,5.8),new t.MeshBasicMaterial({color:i%2?0xb44aff:0xffc45e,transparent:true,opacity:.13,depthWrite:false,side:t.DoubleSide}),x,-.115,z);reflection.rotation.x=-Math.PI/2;}
+// Deep storefront with facade, glazing, framed entrances and glowing interiors.
+const shop=new t.Group();shop.position.set(0,0,-18);creatorWorld.add(shop);
+box(19,7.6,5,0,3.8,-1,brick,shop);
+box(19.8,.5,6.4,0,7.7,-.6,violet,shop);
+box(19.8,.12,6.5,0,7.4,-.55,new t.MeshBasicMaterial({color:0xbd56ff}),shop);
+for(let x=-8.4;x<=8.4;x+=2.8){
+ box(2.48,4.55,.12,x,2.62,1.57,glassLit,shop);
+ box(2.5,.1,.17,x,4.93,1.68,gold,shop);
+ box(2.5,.1,.17,x,.31,1.68,gold,shop);
+ box(.11,4.7,.2,x-1.26,2.62,1.69,gold,shop);
+ box(.11,4.7,.2,x+1.26,2.62,1.69,gold,shop);
+ const washer=cylinder(.48,.48,.22,x,1.65,.85,surf(0xb1b7ce,.8,.2),shop);washer.rotation.x=Math.PI/2;
+ const drum=cylinder(.31,.31,.23,x,1.65,1.02,surf(0x1d243d,.7,.15),shop);drum.rotation.x=Math.PI/2;
 }
-slab(14,.3,4.1,0,6.2,-.1,lime,building);
-const awning=cyl(7,7,.65,0,5.5,1.5,lime,64,building);awning.rotation.z=Math.PI/2;awning.scale.set(1,.095,.18);
-const signCanvas=document.createElement('canvas');signCanvas.width=1024;signCanvas.height=200;const ctx=signCanvas.getContext('2d');ctx.fillStyle='#35224e';ctx.fillRect(0,0,1024,200);ctx.fillStyle='#f7d67a';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 74px Arial';ctx.fillText('THE FIRST FAMILY',512,98);
-const sign=obj(new t.PlaneGeometry(9.6,1.5),new t.MeshBasicMaterial({map:new t.CanvasTexture(signCanvas),side:t.DoubleSide}),0,5.2,1.19,building);
-// Smooth planters, rounded foliage, bollards and lamps give the scene actual depth.
-for(const x of [-6.3,6.3])for(const z of [-8,-3,2]){
- cyl(.6,.75,.65,x,.17,z,m(0xc1a575),40);
- cyl(.17,.22,2.2,x,1.5,z,m(0x7b624c),20);
- for(const [dx,dy,dz,r] of [[0,3.1,0,1.12],[-.55,2.7,.1,.78],[.55,2.8,-.1,.83]]){
- const crown=obj(new t.IcosahedronGeometry(r,2),leaf,x+dx,dy,z+dz);crown.scale.y=.85;
- }
-}
-for(const x of [-4.2,4.2])for(const z of [-7,1]){
- cyl(.1,.13,2.6,x,1.3,z,dark,24);
- const bulb=obj(new t.SphereGeometry(.26,24,16),new t.MeshBasicMaterial({color:0xffebae}),x,2.75,z);
- const lamp=new t.PointLight(0xffe8b2,9,8);lamp.position.set(x,2.7,z);creatorWorld.add(lamp);
-}
-const sun=new t.DirectionalLight(0xffd8a5,2.2);sun.position.set(-5,10,8);creatorWorld.add(sun);
-// Interactive, rounded 3D station kiosks, placed beside the character path.
-const studioStations=new t.Group();creatorWorld.add(studioStations);
-const studioTargets=[];const studioNames=[['appearance','LOOK'],['face','FACE'],['body','BODY'],['clothes','STYLE']];
-function stationLabel(label){const c=document.createElement('canvas');c.width=384;c.height=192;const a=c.getContext('2d');a.fillStyle='#41265d';a.fillRect(0,0,384,192);a.strokeStyle='#b5f36c';a.lineWidth=12;a.strokeRect(8,8,368,176);a.fillStyle='#ffdc7c';a.textAlign='center';a.textBaseline='middle';a.font='bold 76px Arial';a.fillText(label,192,100);return new t.CanvasTexture(c)}
-studioNames.forEach(([id,label],i)=>{const g=new t.Group();g.position.set(-5.25+i*3.5,0,-5.2);cyl(.64,.75,.45,0,.25,0,purple,48,g);cyl(.12,.17,1.1,0,.97,0,gold,32,g);const panel=obj(new t.PlaneGeometry(1.8,.9),new t.MeshBasicMaterial({map:stationLabel(label),side:t.DoubleSide}),0,1.65,.1,g);panel.userData.station=id;studioTargets.push(panel);g.userData.station=id;studioStations.add(g)});
+box(18.8,1.25,.3,0,6.35,1.57,violet,shop);
+const signCanvas=document.createElement('canvas');signCanvas.width=2048;signCanvas.height=320;const ctx=signCanvas.getContext('2d');ctx.fillStyle='#3b204e';ctx.fillRect(0,0,2048,320);ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='#e6a1ff';ctx.shadowBlur=24;ctx.fillStyle='#ffd78c';ctx.font='italic bold 158px Georgia';ctx.fillText('The First Family',1024,145);ctx.shadowBlur=0;ctx.fillStyle='#e2d1ef';ctx.font='bold 54px Arial';ctx.fillText('PICK-UP & DELIVERY  •  LAUNDRY SERVICE',1024,258);
+const sign=add(new t.PlaneGeometry(15.8,2.5),new t.MeshBasicMaterial({map:new t.CanvasTexture(signCanvas),side:t.DoubleSide}),0,6.32,1.77,shop);
+for(const x of [-9.3,9.3]){box(.15,7.2,.2,x,3.7,1.7,gold,shop);const lamp=new t.PointLight(0xef9fff,16,11);lamp.position.set(x,5,3.2);shop.add(lamp)}
+// Street perspective and high-rise skyline, with windows and rounded lamp fixtures.
+for(let i=0;i<18;i++){const x=(i%9-4)*4.7;const z=-37-Math.floor(i/9)*5;const h=9+(i*7%12);box(3.6,h,3.5,x,h/2,z,surf(i%3===0?0x352a56:0x262742,.1,.72));for(let row=2;row<h-1;row+=1.6)for(let col of [-.9,.3])if((i+row+col)%3>0.7)neon(.48,.55,.02,x+col,row,z+1.78,0xe9ad70);}
+for(const x of [-10.5,10.5])for(const z of [-10,-2,6]){cylinder(.12,.15,3.8,x,1.8,z,surf(0x342b45,.5,.3));const bulb=add(new t.SphereGeometry(.32,24,16),new t.MeshBasicMaterial({color:0xffcb8b}),x,3.85,z);const lamp=new t.PointLight(0xffa65c,8,9);lamp.position.set(x,3.8,z);creatorWorld.add(lamp);}
+const stage=cylinder(1.9,2.05,.25,0,-.04,0,surf(0x53366f,.4,.22));const stageRing=add(new t.TorusGeometry(1.91,.055,12,96),new t.MeshBasicMaterial({color:0xf6b84e}),0,.085,0);stageRing.rotation.x=Math.PI/2;
+const accent=new t.DirectionalLight(0xc57fff,3);accent.position.set(5,9,5);creatorWorld.add(accent);
+const studioStations=new t.Group();creatorWorld.add(studioStations);const studioTargets=[];
+const studioNames=[['appearance','LOOK'],['face','FACE'],['body','BODY'],['clothes','STYLE']];
+function stationLabel(label){const c=document.createElement('canvas');c.width=384;c.height=192;const a=c.getContext('2d');a.fillStyle='#351b4f';a.fillRect(0,0,384,192);a.strokeStyle='#f4b85e';a.lineWidth=12;a.strokeRect(8,8,368,176);a.fillStyle='#ffe1a2';a.textAlign='center';a.textBaseline='middle';a.font='bold 76px Arial';a.fillText(label,192,100);return new t.CanvasTexture(c)}
+studioNames.forEach(([id,label],i)=>{const g=new t.Group();g.position.set(-6+i*4,0,-7);cylinder(.53,.65,.35,0,.18,0,violet,g);cylinder(.1,.13,1.1,0,.9,0,gold,g);const panel=add(new t.PlaneGeometry(1.8,.9),new t.MeshBasicMaterial({map:stationLabel(label),side:t.DoubleSide}),0,1.5,.12,g);panel.userData.station=id;studioTargets.push(panel);g.userData.station=id;studioStations.add(g)});
 const studioRay=new t.Raycaster(),studioPointer=new t.Vector2();
-function chooseStudioStation(id){document.querySelector('#creatorTabs [data-tab="'+id+'"]')?.click();studioStations.children.forEach(g=>g.scale.setScalar(g.userData.station===id?1.13:1))}
+function chooseStudioStation(id){document.querySelector('#creatorTabs [data-tab="'+id+'"]')?.click();studioStations.children.forEach(g=>g.scale.setScalar(g.userData.station===id?1.12:1))}
 function onStudioTap(event){if(!inCustomize||!creatorWorld.visible)return false;const r=renderer.domElement.getBoundingClientRect();studioPointer.set((event.clientX-r.left)/r.width*2-1,1-(event.clientY-r.top)/r.height*2);studioRay.setFromCamera(studioPointer,camera);const hit=studioRay.intersectObjects(studioTargets,false)[0];if(!hit)return false;chooseStudioStation(hit.object.userData.station);return true}
 const customize3D=document.getElementById('tffCustomize3D');let inCustomize=false;
 function resize(){const target=inCustomize?customize3D:view;const w=target.clientWidth,h=target.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
 new ResizeObserver(resize).observe(view);new ResizeObserver(resize).observe(customize3D);resize();
-window.addEventListener('tff:custom-open',()=>{inCustomize=true;creatorWorld.visible=true;camera.position.set(2.4,2.25,zoomDistance);camera.lookAt(0,1.6,-3.2);customize3D.appendChild(renderer.domElement);resize()});
+window.addEventListener('tff:custom-open',()=>{inCustomize=true;creatorWorld.visible=true;camera.position.set(1.2,2.05,zoomDistance);camera.lookAt(0,1.7,-2.4);customize3D.appendChild(renderer.domElement);resize()});
 window.addEventListener('tff:custom-close',()=>{inCustomize=false;creatorWorld.visible=false;setZoom(7.5);view.appendChild(renderer.domElement);resize()});customize3D.addEventListener('wheel',e=>{if(!inCustomize)return;e.preventDefault();setZoom(zoomDistance+Math.sign(e.deltaY)*.45)},{passive:false});
 view.addEventListener('pointerdown',e=>{if(!avatar)return;drag=true;last=e.clientX;view.setPointerCapture(e.pointerId)});
 view.addEventListener('pointermove',e=>{if(!drag||!avatar)return;avatar.rotation.y+=(e.clientX-last)*.015;last=e.clientX});
