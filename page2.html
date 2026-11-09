@@ -189,6 +189,7 @@
 }
 </style>
 <style id="tff-studio-3d-tuning">#customDialog .customControls{background:linear-gradient(145deg,#28164fcb,#32225ccc)!important;backdrop-filter:blur(5px)}#customDialog .avatarStage{background:linear-gradient(#1a2c66,#7651a4 68%,#242743)!important}</style>
+<style id="tff-room-scene-fix">#customDialog .avatarStage{background:linear-gradient(#242450,#45336c)!important}#customDialog .customControls{width:min(42vw,310px)!important}#customDialog .creatorActions button{overflow-wrap:anywhere!important}@media(max-width:620px) and (orientation:portrait){#customDialog .customControls{width:45vw!important;right:4px!important}#customDialog #creatorTabs{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:3px!important}#customDialog #creatorTabs button{font-size:10px!important;min-width:0!important}#customDialog .creatorActions{grid-template-columns:1fr 1fr!important}#customDialog .creatorActions #customBack{grid-column:span 2!important}}</style>
 <script type="module" id="tff-glb-loader">
 const host=document.querySelector('.scene'),view=document.createElement('div'),label=document.createElement('div');
 view.id='tffModelViewport';label.id='tff3dStatus';const backdrop=document.createElement('canvas');backdrop.id='esinedCleanBackdrop';host.append(backdrop,view,label);
@@ -223,7 +224,7 @@ try{
 const t=await import('https://esm.sh/three@0.160.1');
 const {GLTFLoader}=await import('https://esm.sh/three@0.160.1/examples/jsm/loaders/GLTFLoader.js');
 THREE={...t,GLTFLoader};renderer=new t.WebGLRenderer({alpha:true,antialias:true});renderer.setClearColor(0,0);renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));view.appendChild(renderer.domElement);
-world=new t.Scene();camera=new t.PerspectiveCamera(36,1,.1,100);camera.position.set(0,1.7,7.5);camera.lookAt(0,1.7,0);let zoomDistance=7.5;function setZoom(d){zoomDistance=Math.max(2.1,Math.min(12,d));camera.position.z=zoomDistance;camera.lookAt(0,1.7,0)}document.getElementById('zoomIn').onclick=()=>setZoom(zoomDistance-.65);document.getElementById('zoomOut').onclick=()=>setZoom(zoomDistance+.65);document.getElementById('zoomReset').onclick=()=>setZoom(7.5);
+world=new t.Scene();camera=new t.PerspectiveCamera(36,1,.1,100);camera.position.set(0,1.7,7.5);camera.lookAt(0,1.7,0);let zoomDistance=7.5;function setZoom(d){zoomDistance=Math.max(2.1,Math.min(12,d));camera.position.z=zoomDistance;camera.lookAt(0,inCustomize?1.6:1.7,inCustomize?-1.4:0)}document.getElementById('zoomIn').onclick=()=>setZoom(zoomDistance-.65);document.getElementById('zoomOut').onclick=()=>setZoom(zoomDistance+.65);document.getElementById('zoomReset').onclick=()=>setZoom(7.5);
 world.add(new t.HemisphereLight(0xffffff,0x44334c,2.5));const light=new t.DirectionalLight(0xffdfbb,3);light.position.set(-4,8,5);world.add(light);
 
 // Real Three.js 3D environment: modeled storefront, pavement, windows, skyline and lighting.
@@ -242,18 +243,32 @@ const signCanvas=document.createElement('canvas');signCanvas.width=1024;signCanv
 const edgeLight=new t.PointLight(0xc7ff64,35,14);edgeLight.position.set(-3,3,-3);creatorWorld.add(edgeLight);
 world.background=null;
 
+
+// Replace the facade with a walk-in, perspective 3D character studio.
+creatorWorld.clear();
+const floorMat=material(0x35354f,.22,.35),wallMat=material(0x31275d,.05,.8);
+block(creatorWorld,17,.16,19,0,-.12,-3.5,floorMat);
+block(creatorWorld,17,8,.2,0,3.8,-12.8,wallMat);
+block(creatorWorld,.22,8,19,-8.4,3.8,-3.5,material(0x42347a));
+block(creatorWorld,.22,8,19,8.4,3.8,-3.5,material(0x42347a));
+const floorGrid=new t.GridHelper(17,20,0xa5d947,0x706a9b);floorGrid.position.set(0,-.026,-3.5);creatorWorld.add(floorGrid);
+for(let z=-11;z<6;z+=3.5){block(creatorWorld,.13,.12,17,-8.2,5.6,z,lime);block(creatorWorld,.13,.12,17,8.2,5.6,z,lime)}
+for(let x of [-6,-3,0,3,6]){const fixture=block(creatorWorld,1.2,.08,.55,x,6.6,-6.8,material(0xe5e5f6,.2));const glow=new t.PointLight(0x93c9ff,4,7);glow.position.set(x,6.2,-6.8);creatorWorld.add(glow)}
+const podium=new t.Mesh(new t.CylinderGeometry(1.7,1.9,.22,48),material(0x6d4aab,.35,.35));podium.position.set(0,-.02,0);creatorWorld.add(podium);
+const ring=new t.Mesh(new t.TorusGeometry(1.72,.045,8,64),new t.MeshBasicMaterial({color:0xcaff62}));ring.rotation.x=Math.PI/2;ring.position.set(0,.11,0);creatorWorld.add(ring);
+for(const x of [-5.8,5.8]){const mirror=block(creatorWorld,2.3,4.4,.09,x,2.5,-8.6,glass);block(creatorWorld,2.55,.12,.16,x,4.77,-8.52,gold);block(creatorWorld,2.55,.12,.16,x,.23,-8.52,gold)}
 const studioStations=new t.Group();creatorWorld.add(studioStations);
 const studioTargets=[];
 const studioNames=[['appearance','APPEARANCE'],['face','FACE'],['body','BODY'],['clothes','CLOTHES']];
 const stationTexture=(label)=>{const c=document.createElement('canvas');c.width=512;c.height=192;const x=c.getContext('2d');x.fillStyle='#23153c';x.fillRect(0,0,512,192);x.strokeStyle='#c8f763';x.lineWidth=14;x.strokeRect(8,8,496,176);x.fillStyle='#f9e6a4';x.font='bold 52px Arial';x.textAlign='center';x.textBaseline='middle';x.fillText(label,256,100);return new t.CanvasTexture(c)};
-studioNames.forEach(([id,label],i)=>{const group=new t.Group();const x=-3.4+i*2.25;group.position.set(x,.3,-2.8);const stand=block(group,1.65,.14,.7,0,0,0,material(0x99cf3b,.25));const screen=new t.Mesh(new t.PlaneGeometry(1.75,.7),new t.MeshBasicMaterial({map:stationTexture(label),side:t.DoubleSide}));screen.position.set(0,.65,.08);group.add(screen);block(group,.12,.65,.12,0,.27,0,material(0xf8c45b,.5));group.userData.station=id;screen.userData.station=id;stand.userData.station=id;studioStations.add(group);studioTargets.push(screen,stand)});
+studioNames.forEach(([id,label],i)=>{const group=new t.Group();const x=-3.4+i*2.25;group.position.set(x,.3,-4.2);const stand=block(group,1.65,.14,.7,0,0,0,material(0x99cf3b,.25));const screen=new t.Mesh(new t.PlaneGeometry(1.75,.7),new t.MeshBasicMaterial({map:stationTexture(label),side:t.DoubleSide}));screen.position.set(0,.65,.08);group.add(screen);block(group,.12,.65,.12,0,.27,0,material(0xf8c45b,.5));group.userData.station=id;screen.userData.station=id;stand.userData.station=id;studioStations.add(group);studioTargets.push(screen,stand)});
 const studioRay=new t.Raycaster(),studioPointer=new t.Vector2();
 function chooseStudioStation(id){const button=document.querySelector('#creatorTabs [data-tab="'+id+'"]');if(button)button.click();studioStations.children.forEach(g=>{const active=g.userData.station===id;g.scale.setScalar(active?1.13:1)})}
 function onStudioTap(event){if(!inCustomize||!creatorWorld.visible||!studioTargets.length)return false;const rect=renderer.domElement.getBoundingClientRect();studioPointer.set(2*(event.clientX-rect.left)/rect.width-1,1-2*(event.clientY-rect.top)/rect.height);studioRay.setFromCamera(studioPointer,camera);const hits=studioRay.intersectObjects(studioTargets,false);if(!hits.length)return false;chooseStudioStation(hits[0].object.userData.station);return true}
 const customize3D=document.getElementById('tffCustomize3D');let inCustomize=false;
 function resize(){const target=inCustomize?customize3D:view;const w=target.clientWidth,h=target.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
 new ResizeObserver(resize).observe(view);new ResizeObserver(resize).observe(customize3D);resize();
-window.addEventListener('tff:custom-open',()=>{inCustomize=true;creatorWorld.visible=true;customize3D.appendChild(renderer.domElement);resize()});
+window.addEventListener('tff:custom-open',()=>{inCustomize=true;creatorWorld.visible=true;camera.position.set(2.2,2.25,zoomDistance);camera.lookAt(0,1.6,-1.4);customize3D.appendChild(renderer.domElement);resize()});
 window.addEventListener('tff:custom-close',()=>{inCustomize=false;creatorWorld.visible=false;setZoom(7.5);view.appendChild(renderer.domElement);resize()});customize3D.addEventListener('wheel',e=>{if(!inCustomize)return;e.preventDefault();setZoom(zoomDistance+Math.sign(e.deltaY)*.45)},{passive:false});
 view.addEventListener('pointerdown',e=>{if(!avatar)return;drag=true;last=e.clientX;view.setPointerCapture(e.pointerId)});
 view.addEventListener('pointermove',e=>{if(!drag||!avatar)return;avatar.rotation.y+=(e.clientX-last)*.015;last=e.clientX});
