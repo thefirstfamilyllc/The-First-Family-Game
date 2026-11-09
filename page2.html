@@ -72,7 +72,7 @@
 <script type="module" id="tff-glb-loader">
 const host=document.querySelector('.scene'),view=document.createElement('div'),label=document.createElement('div');
 view.id='tffModelViewport';label.id='tff3dStatus';host.append(view,label);
-const people=[['Jay','jay.glb'],['Esined','esined.glb'],['Jahdē','jahde.glb']];
+const people=[['Jay','jay.glb'],['Esined','../../../model.glb'],['Jahdē','jahde.glb']];
 let THREE,renderer,world,camera,avatar=null,selected=0,token=0,drag=false,last=0;
 function say(t){label.textContent=t}
 function prefs(){try{return JSON.parse(localStorage.getItem('tffCharacterSettings')||'{}')[people[selected][0]]||{}}catch(e){return {}}}
