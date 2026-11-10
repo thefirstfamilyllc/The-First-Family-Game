@@ -385,4 +385,32 @@ clock=new t.Clock();function loop(){const dt=clock.getDelta();if(mixer)mixer.upd
  }
 })();
 </script>
+<style id="tff-simple-color-controls">
+#customDialog #colors,#customDialog #shoeColors{display:none!important}
+#customDialog .customGroup:has(#colors),#customDialog .customGroup:has(#shoeColors){display:none!important}
+#customDialog .simpleColorRow{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;margin:7px 0!important;color:#fff5db!important;font-weight:700!important}
+#customDialog .simpleColorRow select{width:58%;min-width:0;padding:10px 6px;background:#351747;color:white;border:2px solid #edc365;border-radius:10px;font:inherit}
+#customDialog .creatorPane label:has(> input[type=color]){display:none!important}
+</style>
+<script id="tff-simple-color-script">
+(function(){
+ const sets=[
+ ['skinColor','Skin tone',[['Light','#f2c69c'],['Tan','#cb8b5d'],['Brown','#99603d'],['Dark','#613b2c']]],
+ ['eyeColor','Eye color',[['Brown','#63452e'],['Hazel','#98703e'],['Green','#3d8a51'],['Blue','#367db6'],['Gray','#7e8990']]],
+ ['hairColor','Hair color',[['Black','#201818'],['Brown','#543527'],['Blonde','#b99b57'],['Red','#9c4630'],['Gray','#929292']]],
+ ['outfitColor','Clothing color',[['Purple','#7425b6'],['Green','#48b84e'],['Black','#25242a'],['Blue','#1977db'],['Red','#db3348'],['White','#f2f0ef']]],
+ ['shoeColor','Shoe color',[['White','#f2f0ef'],['Black','#25242a'],['Red','#db3348']]]
+ ];
+ for(const [id,label,choices] of sets){
+  const input=document.getElementById(id);if(!input)continue;
+  const row=document.createElement('label');row.className='simpleColorRow';row.append(document.createTextNode(label));
+  const select=document.createElement('select');select.setAttribute('aria-label',label);
+  for(const [name,hex] of choices){const option=document.createElement('option');option.value=hex;option.textContent=name;select.append(option)}
+  const sync=()=>{let found=choices.find(x=>x[1].toLowerCase()===input.value.toLowerCase());if(!found){const opt=document.createElement('option');opt.value=input.value;opt.textContent='Current color';select.append(opt);found=['Current color',input.value]}select.value=found[1]};
+  select.onchange=()=>{input.value=select.value;input.dispatchEvent(new Event('input',{bubbles:true}))};
+  input.closest('label').insertAdjacentElement('afterend',row);row.append(select);
+  sync();window.addEventListener('tff:character',()=>requestAnimationFrame(sync));
+ }
+})();
+</script>
 </body></html>
