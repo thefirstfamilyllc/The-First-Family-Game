@@ -305,9 +305,23 @@ creatorLayout.textContent=`
 #customDialog #tffCustomize3D{position:absolute!important;inset:0!important;width:100%!important;height:100%!important}
 #customDialog .customControls{position:relative!important;inset:auto!important;width:100%!important;height:100%!important;min-width:0!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;display:flex!important;flex-direction:column!important;gap:10px!important;padding:12px!important;scrollbar-width:thin}
 #customDialog .customControls .creatorPane{min-height:0!important}
-#customDialog .customNav{height:64px!important;min-height:64px!important}
+#customDialog .customNav{height:48px!important;min-height:48px!important;position:relative!important;z-index:2!important;flex-shrink:0!important}
 #customDialog .customControls button{min-height:38px}
 @media (max-width:800px){#customDialog .customBody{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)!important}#customDialog .customControls{padding:7px!important;gap:6px!important}#customDialog .customControls p{margin:0!important}#customDialog .customNav{height:52px!important;min-height:52px!important}#customDialog .customBody{height:calc(100% - 52px)!important}#customDialog #creatorTabs{gap:4px!important}#customDialog #creatorTabs button{font-size:clamp(9px,1.5vw,14px)!important;padding:5px 2px!important}}
+
+/* Approved-screen framing repair: no top-bar overlap or model-obscuring box. */
+#customDialog{padding:0!important;background:#100719!important}
+#customDialog .customPanel{width:min(100vw,177.68dvh)!important;height:min(100dvh,56.28vw)!important;max-height:100dvh!important;max-width:none!important;padding:0!important;border:0!important;border-radius:0!important;background:linear-gradient(125deg,#1a092b,#3a164f 55%,#190a2b)!important;box-shadow:none!important;backdrop-filter:none!important}
+#customDialog .customNav{height:10%!important;min-height:0!important;padding:0 1.5%!important;background:#1a0a2ad9!important;align-items:center!important}
+#customDialog .customBody{height:90%!important;min-height:0!important;grid-template-columns:minmax(0,65fr) minmax(0,35fr)!important;overflow:hidden!important}
+#customDialog .avatarStage{isolation:isolate!important;overflow:hidden!important;background:transparent!important;border:0!important;border-radius:0!important}
+#customDialog #tffCustomize3D{inset:0!important;position:absolute!important;border:0!important;border-radius:0!important;overflow:hidden!important}
+#customDialog .customControls{height:100%!important;max-height:100%!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;border:2px solid #e0ac54!important;border-radius:14px!important;background:linear-gradient(#341044,#1b0b2b)!important;box-shadow:none!important;scrollbar-width:thin!important}
+#customDialog .zoomControls{position:absolute!important;z-index:5!important;left:2%!important;right:2%!important;bottom:2%!important;display:flex!important;justify-content:center!important;gap:6px!important;pointer-events:none!important}
+#customDialog .zoomControls button{pointer-events:auto!important}
+#customDialog .customControls .creatorPane[hidden]{display:none!important}
+#customDialog .customControls #customHint{display:none!important}
+@media(orientation:portrait){#customDialog .customPanel{width:100vw!important;height:100dvh!important;max-height:100dvh!important}#customDialog .customNav{height:9%!important}#customDialog .customBody{height:91%!important;grid-template-columns:1fr!important;grid-template-rows:minmax(0,62fr) minmax(0,38fr)!important}#customDialog .customControls{border-radius:8px!important;padding:6px!important}#customDialog .customNav h2{font-size:14px!important}#customDialog .zoomControls{bottom:1%!important}}
 `;document.head.appendChild(creatorLayout);
 const customize3D=document.getElementById('tffCustomize3D');let inCustomize=false;
 function resize(){const target=inCustomize?customize3D:view;const w=target.clientWidth,h=target.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();frameAvatar()}
