@@ -354,4 +354,35 @@ renderer.domElement.addEventListener('pointerdown',event=>{
 
 clock=new t.Clock();function loop(){const dt=clock.getDelta();if(mixer)mixer.update(dt);renderer.render(world,camera);requestAnimationFrame(loop)}loop();select(0)
 }catch(e){console.error(e);say('3D ENGINE UNAVAILABLE')}
-</script></body></html>
+</script><style id="tff-option-pickers">
+#customDialog .optionPicker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:4px 0 9px}
+#customDialog .optionPicker button{min-height:38px!important;padding:6px 3px!important;font-size:clamp(10px,1.3vw,13px)!important;border-radius:9px!important}
+#customDialog .optionPicker button[aria-pressed="true"]{background:linear-gradient(#ffe18a,#dca52d)!important;color:#24102c!important;border:2px solid white!important}
+#customDialog .creatorPane label:has(> input[data-shape]){display:block!important}
+#customDialog .creatorPane input[data-shape]{display:none!important}
+#customDialog .customControls{overscroll-behavior:contain}
+</style>
+<script id="tff-option-picker-script">
+/* Replace numeric shape sliders with explicit, accessible choices. */
+(function(){
+ const configs={
+ height:[['Short',-30],['Average',0],['Tall',30]],
+ build:[['Slim',-40],['Average',0],['Broad',45]],
+ shoulders:[['Narrow',-55],['Average',0],['Wide',55]],
+ waist:[['Slim',-55],['Average',0],['Wide',55]],
+ faceWidth:[['Narrow',-65],['Average',0],['Wide',65]],
+ nose:[['Small',-60],['Average',0],['Large',60]],
+ jaw:[['Soft',-60],['Average',0],['Defined',60]],
+ eyes:[['Small',-60],['Average',0],['Large',60]]
+ };
+ for(const input of document.querySelectorAll('#customDialog input[data-shape]')){
+  const options=configs[input.dataset.shape];if(!options)continue;
+  const picker=document.createElement('div');picker.className='optionPicker';picker.setAttribute('role','group');picker.setAttribute('aria-label',input.closest('label')?.textContent.trim()||input.dataset.shape);
+  const refresh=()=>picker.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.value)===Number(input.value))));
+  for(const [name,value] of options){const b=document.createElement('button');b.type='button';b.textContent=name;b.dataset.value=value;b.onclick=()=>{input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));refresh()};picker.appendChild(b)}
+  input.closest('label')?.insertAdjacentElement('afterend',picker);refresh();
+  window.addEventListener('tff:character',()=>requestAnimationFrame(refresh));
+ }
+})();
+</script>
+</body></html>
