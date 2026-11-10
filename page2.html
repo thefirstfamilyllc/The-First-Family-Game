@@ -224,7 +224,7 @@ try{
 const t=await import('https://esm.sh/three@0.160.1');
 const {GLTFLoader}=await import('https://esm.sh/three@0.160.1/examples/jsm/loaders/GLTFLoader.js');
 THREE={...t,GLTFLoader};renderer=new t.WebGLRenderer({alpha:true,antialias:true});renderer.setClearColor(0,0);renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));view.appendChild(renderer.domElement);
-world=new t.Scene();camera=new t.PerspectiveCamera(36,1,.1,100);camera.position.set(0,1.7,7.5);camera.lookAt(0,1.7,0);let zoomDistance=7.5;function setZoom(d){zoomDistance=Math.max(2.1,Math.min(12,d));camera.position.z=zoomDistance;camera.lookAt(0,inCustomize?1.7:1.7,inCustomize?-2.4:0)}document.getElementById('zoomIn').onclick=()=>setZoom(zoomDistance-.65);document.getElementById('zoomOut').onclick=()=>setZoom(zoomDistance+.65);document.getElementById('zoomReset').onclick=()=>setZoom(7.5);
+world=new t.Scene();camera=new t.PerspectiveCamera(36,1,.1,100);camera.position.set(0,1.7,7.5);camera.lookAt(0,1.7,0);let zoomDistance=7.5;function setZoom(d){zoomDistance=Math.max(2.1,Math.min(12,d));camera.position.z=zoomDistance;camera.lookAt(0,1.7,0)}document.getElementById('zoomIn').onclick=()=>setZoom(zoomDistance-.65);document.getElementById('zoomOut').onclick=()=>setZoom(zoomDistance+.65);document.getElementById('zoomReset').onclick=()=>setZoom(7.5);
 world.add(new t.HemisphereLight(0xffffff,0x44334c,2.5));const light=new t.DirectionalLight(0xffdfbb,3);light.position.set(-4,8,5);world.add(light);
 
 // Cinematic character customization courtyard. Entire environment is newly modeled 3D geometry.
@@ -312,7 +312,7 @@ creatorLayout.textContent=`
 const customize3D=document.getElementById('tffCustomize3D');let inCustomize=false;
 function resize(){const target=inCustomize?customize3D:view;const w=target.clientWidth,h=target.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
 new ResizeObserver(resize).observe(view);new ResizeObserver(resize).observe(customize3D);resize();
-window.addEventListener('tff:custom-open',()=>{inCustomize=true;creatorWorld.visible=true;camera.position.set(1.2,2.05,zoomDistance);camera.lookAt(0,1.7,-2.4);customize3D.appendChild(renderer.domElement);resize()});
+window.addEventListener('tff:custom-open',()=>{inCustomize=true;creatorWorld.visible=false;camera.position.set(0,1.7,zoomDistance);camera.lookAt(0,1.7,0);customize3D.appendChild(renderer.domElement);resize();if(!avatar)select(selected)});
 window.addEventListener('tff:custom-close',()=>{inCustomize=false;creatorWorld.visible=false;setZoom(7.5);view.appendChild(renderer.domElement);resize()});customize3D.addEventListener('wheel',e=>{if(!inCustomize)return;e.preventDefault();setZoom(zoomDistance+Math.sign(e.deltaY)*.45)},{passive:false});
 view.addEventListener('pointerdown',e=>{if(!avatar)return;drag=true;last=e.clientX;view.setPointerCapture(e.pointerId)});
 view.addEventListener('pointermove',e=>{if(!drag||!avatar)return;avatar.rotation.y+=(e.clientX-last)*.015;last=e.clientX});
